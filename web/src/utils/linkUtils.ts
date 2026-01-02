@@ -1,0 +1,81 @@
+import type { Inbound } from '../types/inbound';
+
+/**
+ * 将 Inbound 节点转换为 Xray 分享链接
+ */
+export function generateShareLink(inbound: Inbound, serverAddr: string = window.location.hostname): string {
+    const { protocol, settings, streamSettings, remark } = inbound;
+    const urlRemark = encodeURIComponent(remark);
+
+    if (protocol === 'vless') {
+        const uuid = settings?.clients?.[0]?.id || '';
+        const flow = settings?.clients?.[0]?.flow || '';
+        const port = inbound.port;
+        const params = new URLSearchParams();
+
+        if (streamSettings) {
+            params.set('type', streamSettings.network || 'tcp');
+            params.set('security', streamSettings.security || 'none');
+
+            if (flow) params.set('flow', flow);
+
+            if (streamSettings.security === 'reality') {
+                const rs = streamSettings.realitySettings;
+                if (rs) {
+                    params.set('sni', rs.serverNames?.[0] || '');
+                    params.set('fp', rs.fingerprint || 'chrome');
+                    params.set('pbk', rs.publicKey || '');
+                    params.set('sid', rs.shortIds?.[0] || '');
+                }
+            } else if (streamSettings.security === 'tls') {
+                params.set('sni', streamSettings.tlsSettings?.serverName || '');
+            }
+
+            if (streamSettings.network === 'ws') {
+                params.set('path', streamSettings.wsSettings?.path || '/');
+                params.set('host', streamSettings.wsSettings?.headers?.Host || '');
+            } else if (streamSettings.network === 'grpc') {
+                params.set('serviceName', streamSettings.grpcSettings?.serviceName || '');
+            }
+        }
+
+        return `vless://${uuid}@${serverAddr}:${port}?${params.toString()}#${urlRemark}`;
+    }
+
+    if (protocol === 'trojan') {
+        const password = settings?.clients?.[0]?.password || '';
+        const port = inbound.port;
+        const params = new URLSearchParams();
+
+        if (streamSettings) {
+            params.set('security', streamSettings.security || 'tls');
+            params.set('type', streamSettings.network || 'tcp');
+            params.set('sni', streamSettings.tlsSettings?.serverName || '');
+
+            if (streamSettings.network === 'ws') {
+                params.set('path', streamSettings.wsSettings?.path || '/');
+                params.set('host', streamSettings.wsSettings?.headers?.Host || '');
+            } else if (streamSettings.network === 'grpc') {
+                params.set('serviceName', streamSettings.grpcSettings?.serviceName || '');
+            }
+        }
+
+        return `trojan://${password}@${serverAddr}:${port}?${params.toString()}#${urlRemark}`;
+    }
+
+    // 更多协议支持可以在此扩展
+    return '';
+}
+
+/**
+ * 复制文本到剪贴板
+ */
+export async function copyToClipboard(text: string): Promise<boolean> {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        return false;
+    }
+}

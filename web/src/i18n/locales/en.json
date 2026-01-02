@@ -1,0 +1,60 @@
+{
+    "login": {
+        "title": "X-UI-RS",
+        "username": "Username",
+        "password": "Password",
+        "submit": "Login",
+        "error_empty": "Please enter complete login information",
+        "error_failed": "Incorrect username or password"
+    },
+    "dashboard": {
+        "system_status": "System Status",
+        "os": "Operating System",
+        "cpu": "CPU Usage",
+        "memory": "Memory",
+        "swap": "Swap",
+        "disk": "Disk Space",
+        "uptime": "Uptime",
+        "load": "System Load",
+        "network_speed": "Network Speed",
+        "up": "Upload",
+        "down": "Download"
+    },
+    "inbound": {
+        "title": "Inbound List",
+        "add_node": "Add New Node",
+        "search_placeholder": "Search remark / port / protocol...",
+        "table": {
+            "remark": "Remark",
+            "type": "Type",
+            "port": "Port",
+            "traffic": "Traffic",
+            "expiry": "Expiry",
+            "status": "Status",
+            "actions": "Actions"
+        },
+        "reset_all": "Reset All Traffic"
+    },
+    "settings": {
+        "title": "Panel Settings",
+        "tabs": {
+            "panel": "Panel Config",
+            "user": "User Management",
+            "backup": "Backup & Restore",
+            "advanced": "Advanced"
+        },
+        "save": "Save Configuration",
+        "restart": "Restart Panel"
+    },
+    "sidebar": {
+        "dashboard": "Dashboard",
+        "inbounds": "Inbounds",
+        "settings": "Settings",
+        "logout": "Logout"
+    },
+    "common": {
+        "system_ready": "System Ready",
+        "online": "Online",
+        "offline": "Offline"
+    }
+}

@@ -1,0 +1,66 @@
+use crate::errors::ApiResult;
+use crate::middleware::auth::AuthUser;
+use crate::models::inbound::{CreateInboundRequest, DeleteInboundRequest, UpdateInboundRequest};
+use crate::services::{inbound_service, system_service::SharedMonitor, xray_service};
+use crate::utils::{reality, response::ApiResponse};
+use axum::extract::{Extension, Json, State};
+
+use sqlx::SqlitePool;
+
+pub async fn list_inbounds(
+    _user: AuthUser,
+    Extension(pool): Extension<SqlitePool>,
+) -> ApiResult<ApiResponse<Vec<crate::models::inbound::Inbound>>> {
+    let list = inbound_service::get_all_inbounds(&pool).await?;
+    Ok(ApiResponse::success(list))
+}
+
+pub async fn add_inbound(
+    _user: AuthUser,
+    State(monitor): State<SharedMonitor>,
+    Extension(pool): Extension<SqlitePool>,
+    Json(payload): Json<CreateInboundRequest>,
+) -> ApiResult<ApiResponse<crate::models::inbound::Inbound>> {
+    let inbound = inbound_service::add_inbound(&pool, payload).await?;
+
+    // Automatically apply config change
+    xray_service::apply_config(&pool, monitor).await?;
+
+    Ok(ApiResponse::success_with_msg(inbound, "Added successfully"))
+}
+
+pub async fn update_inbound(
+    _user: AuthUser,
+    State(monitor): State<SharedMonitor>,
+    Extension(pool): Extension<SqlitePool>,
+    Json(payload): Json<UpdateInboundRequest>,
+) -> ApiResult<ApiResponse<crate::models::inbound::Inbound>> {
+    let inbound = inbound_service::update_inbound(&pool, payload).await?;
+
+    xray_service::apply_config(&pool, monitor).await?;
+
+    Ok(ApiResponse::success_with_msg(
+        inbound,
+        "Updated successfully",
+    ))
+}
+
+pub async fn del_inbound_post(
+    _user: AuthUser,
+    State(monitor): State<SharedMonitor>,
+    Extension(pool): Extension<SqlitePool>,
+    Json(payload): Json<DeleteInboundRequest>,
+) -> ApiResult<ApiResponse<()>> {
+    inbound_service::delete_inbound(&pool, &payload.id).await?;
+    xray_service::apply_config(&pool, monitor).await?;
+    Ok(ApiResponse::success_no_data("Deleted successfully"))
+}
+pub async fn check_reality(
+    _user: AuthUser,
+    Json(payload): Json<reality::RealityCheckRequest>,
+) -> ApiResult<ApiResponse<reality::RealityCheckResponse>> {
+    let result = reality::check_domain(&payload.domain)
+        .await
+        .map_err(|e| crate::errors::ApiError::InternalError(e.to_string()))?;
+    Ok(ApiResponse::success(result))
+}

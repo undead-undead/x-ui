@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-UI WebRoot 重置工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 X-UI WebRoot 重置工具</h1>
+        <p>此工具将帮助您重置 WebRoot 配置，解决 404 问题</p>
+        
+        <div id="status"></div>
+        
+        <button onclick="resetWebRoot()">立即重置 WebRoot</button>
+        
+        <div class="info">
+            <strong>说明：</strong><br>
+            点击按钮后，系统会将 WebRoot 重置为默认值 "/"，<br>
+            然后自动跳转到正确的地址。
+        </div>
+    </div>
+
+    <script>
+        function resetWebRoot() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                // 读取当前存储
+                const storageKey = 'x-ui-settings-storage';
+                const storageData = localStorage.getItem(storageKey);
+                
+                if (!storageData) {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ 未找到配置数据，可能您还没有登录过面板';
+                    return;
+                }
+                
+                // 解析并修改
+                const storage = JSON.parse(storageData);
+                
+                if (storage.state && storage.state.panel) {
+                    const oldWebRoot = storage.state.panel.webRoot;
+                    storage.state.panel.webRoot = '/';
+                    
+                    // 保存回去
+                    localStorage.setItem(storageKey, JSON.stringify(storage));
+                    
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `
+                        ✅ 重置成功！<br>
+                        旧路径: ${oldWebRoot}<br>
+                        新路径: /<br><br>
+                        页面将在 2 秒后自动跳转...
+                    `;
+                    
+                    // 2秒后跳转
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:5173/';
+                    }, 2000);
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ 配置数据格式异常';
+                }
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ 重置失败: ${error.message}`;
+            }
+        }
+        
+        // 页面加载时显示当前配置
+        window.onload = function() {
+            try {
+                const storage = JSON.parse(localStorage.getItem('x-ui-settings-storage'));
+                if (storage && storage.state && storage.state.panel) {
+                    const currentWebRoot = storage.state.panel.webRoot;
+                    document.getElementById('status').innerHTML = `
+                        <div style="padding: 15px; background: #fff3cd; border-radius: 10px; color: #856404;">
+                            📍 当前 WebRoot: <strong>${currentWebRoot}</strong>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                // 忽略错误
+            }
+        };
+    </script>
+</body>
+</html>
