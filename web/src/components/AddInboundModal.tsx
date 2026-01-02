@@ -252,12 +252,16 @@ export const AddInboundModal = () => {
     };
 
     const generateRealityKeys = () => {
-        const mockPriv = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-            .map(b => b.toString(16).padStart(2, '0')).join('');
-        const mockPub = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-            .map(b => b.toString(16).padStart(2, '0')).join('');
-        setRealityPrivateKey(mockPriv);
-        setRealityPublicKey(mockPub);
+        // 生成 32 字节随机数据
+        const privBytes = crypto.getRandomValues(new Uint8Array(32));
+        const pubBytes = crypto.getRandomValues(new Uint8Array(32));
+
+        // 转换为 Base64 (Xray Reality 要求的格式)
+        const privBase64 = btoa(String.fromCharCode(...privBytes));
+        const pubBase64 = btoa(String.fromCharCode(...pubBytes));
+
+        setRealityPrivateKey(privBase64);
+        setRealityPublicKey(pubBase64);
     };
 
     const generateShortIds = () => {
