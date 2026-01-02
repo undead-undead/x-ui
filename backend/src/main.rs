@@ -179,7 +179,8 @@ async fn main() -> anyhow::Result<()> {
         .allow_headers([
             axum::http::header::CONTENT_TYPE,
             axum::http::header::AUTHORIZATION,
-        ]); // 移除 allow_credentials(true) 以兼容 wildcard origin
+        ])
+        .allow_credentials(false); // 显式禁用 credentials 以兼容 wildcard origin
 
     // 构建 API 路由
     let api_router = routes::create_router(pool, monitor)
