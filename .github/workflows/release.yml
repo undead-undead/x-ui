@@ -100,4 +100,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: x-ui-linux-${{ matrix.arch }}.tar.gz
+          files: |
+            x-ui-linux-${{ matrix.arch }}.tar.gz
+            install.sh
