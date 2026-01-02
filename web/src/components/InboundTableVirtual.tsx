@@ -1,0 +1,283 @@
+import React, { memo, useCallback, useRef, useState } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import type { Inbound } from '../types/inbound';
+import { formatTraffic } from '../utils/format';
+import { Switch } from './ui/Switch';
+import { useInboundStore } from '../store/useInboundStore';
+import { useModalStore } from '../store/useModalStore';
+import { useDialogStore } from '../store/useDialogStore';
+import { useQRCodeStore } from '../store/useQRCodeStore';
+import { Dropdown, DropdownItem } from './ui/Dropdown';
+import { QrCode, RefreshCw, Edit3, Trash2, Copy } from 'lucide-react';
+import { generateShareLink, copyToClipboard } from '../utils/linkUtils';
+import { toast } from 'react-hot-toast';
+
+interface InboundTableVirtualProps {
+    inbounds: Inbound[];
+    isEmbedded?: boolean;
+}
+
+// 单行高度（像素）
+const ROW_HEIGHT = 100;
+
+interface VirtualInboundRowProps {
+    virtualRow: any;
+    item: Inbound;
+    measureElement: (el: HTMLElement | null) => void;
+    onReset: (id: string) => void;
+    onEdit: (item: Inbound) => void;
+    onDelete: (id: string) => void;
+    onToggle: (id: string) => void;
+    onQRCode: (item: Inbound) => void;
+    onCopy: (item: Inbound) => void;
+}
+
+const VirtualInboundRow = memo<VirtualInboundRowProps>(({
+    virtualRow,
+    item,
+    measureElement,
+    onReset,
+    onEdit,
+    onDelete,
+    onToggle,
+    onQRCode,
+    onCopy
+}) => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    return (
+        <div
+            data-index={virtualRow.index}
+            ref={measureElement}
+            className={`border-b border-gray-100 absolute top-0 left-0 w-full ${isMenuOpen ? 'z-50' : 'z-auto'}`}
+            style={{
+                transform: `translateY(${virtualRow.start}px)`,
+            }}
+        >
+            <div className="flex items-center px-8 py-6 hover:bg-gray-50 transition-colors h-full whitespace-nowrap">
+                {/* 备注 */}
+                <div className="flex-[2.5] min-w-0">
+                    <span className="text-[15px] font-bold text-gray-900 tracking-tight truncate block">
+                        {item.remark}
+                    </span>
+                </div>
+
+                {/* 协议 */}
+                <div className="flex-1 min-w-0 px-4 flex justify-center">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 leading-none">
+                        {item.protocol}
+                    </span>
+                </div>
+
+                {/* 端口 */}
+                <div className="flex-1 min-w-0 px-4 text-center">
+                    <span className="text-[14px] font-bold text-gray-900 tabular-nums">
+                        {item.port}
+                    </span>
+                </div>
+
+                {/* 流量 */}
+                <div className="flex-[1.5] min-w-0 px-4">
+                    <div className="flex flex-col gap-1 text-[13px] font-bold tabular-nums">
+                        <span className="text-gray-600">↑ {formatTraffic(item.up)}</span>
+                        <span className="text-gray-600">↓ {formatTraffic(item.down)}</span>
+                    </div>
+                </div>
+
+                {/* 状态 */}
+                <div className="flex-1 min-w-0 px-4 flex justify-center">
+                    <Switch checked={item.enable} onChange={() => onToggle(item.id)} />
+                </div>
+
+                {/* 操作 */}
+                <div className="flex-2 min-w-0 px-4">
+                    <div className="flex items-center justify-end pr-2">
+                        <Dropdown onOpenChange={setIsMenuOpen}>
+                            <DropdownItem
+                                onClick={() => onCopy(item)}
+                                icon={<Copy size={16} strokeWidth={2.5} />}
+                            >
+                                复制链接
+                            </DropdownItem>
+                            <DropdownItem
+                                onClick={() => onQRCode(item)}
+                                icon={<QrCode size={16} strokeWidth={2.5} />}
+                            >
+                                二维码
+                            </DropdownItem>
+                            <DropdownItem
+                                onClick={() => onReset(item.id)}
+                                icon={<RefreshCw size={16} strokeWidth={2.5} />}
+                            >
+                                重置
+                            </DropdownItem>
+                            <DropdownItem
+                                onClick={() => onEdit(item)}
+                                icon={<Edit3 size={16} strokeWidth={2.5} />}
+                            >
+                                编辑
+                            </DropdownItem>
+                            <DropdownItem
+                                onClick={() => onDelete(item.id)}
+                                variant="danger"
+                                icon={<Trash2 size={16} strokeWidth={2.5} />}
+                            >
+                                删除
+                            </DropdownItem>
+                        </Dropdown>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ inbounds, isEmbedded }) => {
+    const { toggleEnable, deleteInbound, resetTraffic } = useInboundStore();
+    const { openModal } = useModalStore();
+
+    // 虚拟滚动容器引用
+    const parentRef = useRef<HTMLDivElement>(null);
+
+    // 使用 TanStack Virtual
+    const virtualizer = useVirtualizer({
+        count: inbounds.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => ROW_HEIGHT,
+        overscan: 5, // 预渲染上下各 5 行
+    });
+
+    const handleToggle = useCallback((id: string) => {
+        toggleEnable(id);
+    }, [toggleEnable]);
+
+    const handleDelete = useCallback((id: string) => {
+        useDialogStore.getState().showConfirm(
+            '确定要删除此节点吗？',
+            () => {
+                deleteInbound(id);
+                toast.success('节点已删除');
+            },
+            '确认删除'
+        );
+    }, [deleteInbound]);
+
+    const handleReset = useCallback((id: string) => {
+        useDialogStore.getState().showConfirm(
+            '确定要重置流量统计吗？',
+            () => {
+                resetTraffic(id);
+                toast.success('流量统计已重置');
+            },
+            '确认重置'
+        );
+    }, [resetTraffic]);
+
+    const handleEdit = useCallback((item: Inbound) => {
+        openModal(item);
+    }, [openModal]);
+
+    const handleQRCode = useCallback((item: Inbound) => {
+        useQRCodeStore.getState().open(item);
+    }, []);
+
+    const handleCopy = useCallback((item: Inbound) => {
+        const link = generateShareLink(item);
+        copyToClipboard(link).then(success => {
+            if (success) toast.success('链接已复制到剪贴板');
+            else toast.error('复制失败');
+        });
+    }, []);
+
+    const containerStyles = isEmbedded
+        ? "w-full"
+        : "bg-white border border-gray-200 rounded-5xl shadow-lg animate-in fade-in slide-in-from-bottom-6 duration-1000";
+
+    return (
+        <div className={containerStyles}>
+            <div className="overflow-x-auto">
+                <div className="min-w-[1000px]">
+                    {/* 虚拟滚动列表容器 */}
+                    <div
+                        ref={parentRef}
+                        className="overflow-y-auto overflow-x-hidden relative"
+                        style={{ height: '600px' }}
+                    >
+                        {/* 固定的表头，现在它在滚动容器内，会自动缩进以避开滚动条 */}
+                        {/* 固定的表头 */}
+                        <div className="sticky top-0 z-30 bg-gray-50 border-b border-gray-200">
+                            <div className="flex items-center py-5 px-8">
+                                <div className="flex-[2.5] min-w-0">
+                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                        备注
+                                    </span>
+                                </div>
+                                <div className="flex-1 min-w-0 px-4 text-center">
+                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                        类型
+                                    </span>
+                                </div>
+                                <div className="flex-1 min-w-0 px-4 text-center">
+                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                        端口
+                                    </span>
+                                </div>
+                                <div className="flex-[1.5] min-w-0 px-4">
+                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                        流量 ↑|↓
+                                    </span>
+                                </div>
+                                <div className="flex-1 min-w-0 px-4 text-center">
+                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                        状态
+                                    </span>
+                                </div>
+                                <div className="flex-2 min-w-0 px-4">
+                                    <div className="flex justify-end pr-2">
+                                        <div className="w-10 flex items-center justify-center">
+                                            <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                                操作
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            style={{
+                                height: `${virtualizer.getTotalSize()}px`,
+                                width: '100%',
+                                position: 'relative',
+                            }}
+                        >
+                            {virtualizer.getVirtualItems().map((virtualRow) => (
+                                <VirtualInboundRow
+                                    key={virtualRow.key}
+                                    virtualRow={virtualRow}
+                                    item={inbounds[virtualRow.index]}
+                                    measureElement={virtualizer.measureElement}
+                                    onReset={handleReset}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
+                                    onToggle={handleToggle}
+                                    onQRCode={handleQRCode}
+                                    onCopy={handleCopy}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* 空状态 */}
+                    {inbounds.length === 0 && (
+                        <div className="p-20 text-center">
+                            <p className="text-gray-400 font-bold tracking-tight text-[15px]">暂无运行中的节点</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+});
+
+InboundTableVirtual.displayName = 'InboundTableVirtual';

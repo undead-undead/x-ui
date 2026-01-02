@@ -1,0 +1,59 @@
+{
+    "login": {
+        "title": "X-UI-RS",
+        "username": "用户名",
+        "password": "密码",
+        "submit": "登录",
+        "error_empty": "请输入完整登录信息",
+        "error_failed": "用户名或密码错误"
+    },
+    "dashboard": {
+        "system_status": "系统实时状态",
+        "os": "操作系统",
+        "cpu": "CPU 使用率",
+        "memory": "内存使用",
+        "swap": "虚拟内存",
+        "disk": "磁盘占用",
+        "uptime": "运行时间",
+        "load": "系统负载",
+        "network_speed": "网络速率",
+        "up": "上传",
+        "down": "下载"
+    },
+    "inbound": {
+        "title": "节点列表",
+        "add_node": "添加新节点",
+        "search_placeholder": "搜索备注 / 端口 / 协议...",
+        "table": {
+            "remark": "备注",
+            "type": "类型",
+            "port": "端口",
+            "traffic": "流量 ↑|↓",
+            "expiry": "到期时间",
+            "status": "状态",
+            "actions": "操作"
+        }
+    },
+    "settings": {
+        "title": "面板设置",
+        "tabs": {
+            "panel": "面板设置",
+            "user": "用户管理",
+            "backup": "备份恢复",
+            "advanced": "系统状态"
+        },
+        "save": "保存当前配置",
+        "restart": "重启面板"
+    },
+    "sidebar": {
+        "dashboard": "系统状态",
+        "inbounds": "节点列表",
+        "settings": "面板设置",
+        "logout": "注销退出"
+    },
+    "common": {
+        "system_ready": "系统就绪",
+        "online": "在线",
+        "offline": "离线"
+    }
+}
