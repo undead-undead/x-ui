@@ -293,15 +293,8 @@ async fn main() -> anyhow::Result<()> {
         let subpath = base_path.clone();
         let subpath_with_slash = format!("{}/", subpath);
         let redirect_to = subpath_with_slash.clone();
-        let redirect_root = subpath_with_slash.clone();
 
         Router::new()
-            .route(
-                "/",
-                axum::routing::get(move || async move {
-                    axum::response::Redirect::permanent(&redirect_root)
-                }),
-            )
             .route(
                 &subpath,
                 axum::routing::get(move || async move {
