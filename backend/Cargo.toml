@@ -33,7 +33,7 @@ anyhow = "1.0"
 thiserror = "2.0"
 
 # 系统监控
-sysinfo = { version = "0.33", default-features = false, features = ["system", "cpu", "memory", "disk", "network"] }
+sysinfo = { version = "0.33", default-features = false, features = ["system", "disk", "network"] }
 
 # 时间处理
 chrono = { version = "0.4", features = ["serde"] }
