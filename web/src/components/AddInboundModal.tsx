@@ -104,7 +104,7 @@ export const AddInboundModal = () => {
                 const settings = editingNode.settings;
                 if (settings.clients && settings.clients[0]) {
                     const client = settings.clients[0];
-                    setUuid(client.id || crypto.randomUUID());
+                    setUuid(client.id || generateUUID());
                     setFlow(client.flow || '');
                     setLevel(String(client.level || 0));
                     setEmail(client.email || '');
@@ -246,7 +246,16 @@ export const AddInboundModal = () => {
 
     const generateShortIds = () => {
         // 生成一个 8 位随机十六进制字符串
-        const shortId = Array.from(crypto.getRandomValues(new Uint8Array(4)))
+        // 安全获取随机值，处理非 HTTPS 环境
+        const randomValues = new Uint8Array(4);
+        if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+            crypto.getRandomValues(randomValues);
+        } else {
+            for (let i = 0; i < 4; i++) {
+                randomValues[i] = Math.floor(Math.random() * 256);
+            }
+        }
+        const shortId = Array.from(randomValues)
             .map(b => b.toString(16).padStart(2, '0')).join('');
         setRealityShortIds(shortId);
     };
@@ -303,7 +312,7 @@ export const AddInboundModal = () => {
             };
         }
 
-        // 构建传输层设置
+        // 构建传输层配置
         let streamSettings: any = {
             network,
             security,
@@ -367,7 +376,7 @@ export const AddInboundModal = () => {
         }
 
         const data: any = {
-            id: editingNode?.id || crypto.randomUUID(),
+            id: editingNode?.id || generateUUID(),
             remark,
             enable: isEnable,
             port: Number(port),
@@ -382,12 +391,17 @@ export const AddInboundModal = () => {
             down: editingNode?.down || 0,
         };
 
-        if (editingNode) {
-            await updateInbound(data);
-        } else {
-            await addInbound(data);
+        try {
+            if (editingNode) {
+                await updateInbound(data);
+            } else {
+                await addInbound(data);
+            }
+            closeModal();
+        } catch (error: any) {
+            // handle error if needed, although store already shows alert
+            console.error('Action failed:', error);
         }
-        closeModal();
     };
 
     if (!isOpen) return null;
