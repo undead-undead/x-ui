@@ -106,9 +106,9 @@ export const useSettingStore = create<SettingStore>()(
                     return;
                 }
 
-                // 验证：新密码不能与原密码相同（如果用户确实输入了新密码）
-                if (newPassword && newPassword === oldPassword) {
-                    useDialogStore.getState().showAlert("新密码不能与原密码相同", "验证失败");
+                // 验证：新用户名不能与原用户名相同（如果用户确实输入了新用户名且没有打算修改密码）
+                if (newUsername && newUsername === oldUsername && !newPassword) {
+                    useDialogStore.getState().showAlert("新用户名不能与原用户名相同", "验证失败");
                     return;
                 }
 
