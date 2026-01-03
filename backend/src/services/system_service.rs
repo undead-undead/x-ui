@@ -446,56 +446,60 @@ pub async fn update_xray(monitor: SharedMonitor, version: String) -> ApiResult<(
         .await
         .map_err(|e| crate::errors::ApiError::SystemError(format!("Failed to read body: {}", e)))?;
 
-    // 4. Extract
-    let reader = std::io::Cursor::new(content);
-    let mut zip = zip::ZipArchive::new(reader)
-        .map_err(|e| crate::errors::ApiError::SystemError(format!("Failed to open zip: {}", e)))?;
-
-    // Find 'xray' file
-    let mut xray_file = zip.by_name("xray").map_err(|_| {
-        crate::errors::ApiError::SystemError("xray binary not found in zip".to_string())
-    })?;
-
-    // 5. Save to temp, then move
-    let bin_path_str = std::env::var("XRAY_BIN_PATH").unwrap_or("/usr/local/bin/xray".to_string());
-    let bin_path = std::path::Path::new(&bin_path_str);
-
-    // Create parent dir if not exists
-    if let Some(parent) = bin_path.parent() {
-        if !parent.exists() {
-            std::fs::create_dir_all(parent).map_err(|e| {
-                crate::errors::ApiError::SystemError(format!("Failed to create bin dir: {}", e))
-            })?;
-        }
-    }
-
-    // Create temp file
-    let tmp_path = bin_path.with_extension("tmp");
-    let mut tmp_file = std::fs::File::create(&tmp_path).map_err(|e| {
-        crate::errors::ApiError::SystemError(format!("Failed to create tmp file: {}", e))
-    })?;
-
-    std::io::copy(&mut xray_file, &mut tmp_file).map_err(|e| {
-        crate::errors::ApiError::SystemError(format!("Failed to write binary: {}", e))
-    })?;
-
-    // 6. Replace and chmod
-    drop(tmp_file); // Flush and close
-
-    // Chmod +x (Unix only)
-    #[cfg(unix)]
+    // 4. Extract (Wrap in a block to ensure non-Send ZipFile is dropped before final .await)
     {
-        use std::os::unix::fs::PermissionsExt;
-        if let Ok(metadata) = std::fs::metadata(&tmp_path) {
-            let mut perms = metadata.permissions();
-            perms.set_mode(0o755);
-            let _ = std::fs::set_permissions(&tmp_path, perms);
-        }
-    }
+        let reader = std::io::Cursor::new(content);
+        let mut zip = zip::ZipArchive::new(reader).map_err(|e| {
+            crate::errors::ApiError::SystemError(format!("Failed to open zip: {}", e))
+        })?;
 
-    std::fs::rename(&tmp_path, bin_path).map_err(|e| {
-        crate::errors::ApiError::SystemError(format!("Failed to replace binary: {}", e))
-    })?;
+        // Find 'xray' file
+        let mut xray_file = zip.by_name("xray").map_err(|_| {
+            crate::errors::ApiError::SystemError("xray binary not found in zip".to_string())
+        })?;
+
+        // 5. Save to temp, then move
+        let bin_path_str =
+            std::env::var("XRAY_BIN_PATH").unwrap_or("/usr/local/bin/xray".to_string());
+        let bin_path = std::path::Path::new(&bin_path_str);
+
+        // Create parent dir if not exists
+        if let Some(parent) = bin_path.parent() {
+            if !parent.exists() {
+                std::fs::create_dir_all(parent).map_err(|e| {
+                    crate::errors::ApiError::SystemError(format!("Failed to create bin dir: {}", e))
+                })?;
+            }
+        }
+
+        // Create temp file
+        let tmp_path = bin_path.with_extension("tmp");
+        let mut tmp_file = std::fs::File::create(&tmp_path).map_err(|e| {
+            crate::errors::ApiError::SystemError(format!("Failed to create tmp file: {}", e))
+        })?;
+
+        std::io::copy(&mut xray_file, &mut tmp_file).map_err(|e| {
+            crate::errors::ApiError::SystemError(format!("Failed to write binary: {}", e))
+        })?;
+
+        // 6. Replace and chmod
+        drop(tmp_file); // Flush and close
+
+        // Chmod +x (Unix only)
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            if let Ok(metadata) = std::fs::metadata(&tmp_path) {
+                let mut perms = metadata.permissions();
+                perms.set_mode(0o755);
+                let _ = std::fs::set_permissions(&tmp_path, perms);
+            }
+        }
+
+        std::fs::rename(&tmp_path, bin_path).map_err(|e| {
+            crate::errors::ApiError::SystemError(format!("Failed to replace binary: {}", e))
+        })?;
+    }
 
     tracing::info!("Xray binary updated successfully to {}", version);
 
