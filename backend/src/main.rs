@@ -305,12 +305,16 @@ async fn main() -> anyhow::Result<()> {
         router.with_state(())
     } else {
         let subpath = base_path.clone(); // 例如 "/123"
-                                         // 关键修复：nest 的路径不应该包含末尾斜杠
         let nest_path = subpath.trim_end_matches('/').to_string();
 
+        // 补全带斜杠的路径 "/123/"
+        // 我们只加这个，因为它和 nest("/123") 不冲突，而且正好填补了 404 的空缺
+        let subpath_slash = format!("{}/", nest_path);
+
         Router::new()
-            // 只使用 nest，移除显式的 route(&subpath_clean) 以避免 "Overlapping method route" Panic
-            // Axum 的 nest 会自动处理前缀匹配
+            // 显式处理 "/123/" -> 返回首页
+            .route(&subpath_slash, axum::routing::get(index_handler.clone()))
+            // 主逻辑：nest("/123") 处理 "/123" 和 "/123/api/..."
             .nest(&nest_path, router)
             // 全局兜底
             .fallback(
