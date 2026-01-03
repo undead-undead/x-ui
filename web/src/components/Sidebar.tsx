@@ -64,11 +64,20 @@ export const Sidebar = memo(() => {
             </nav>
 
             {/* Bottom Actions */}
-            <div className="p-4 mt-auto flex justify-center">
+            <div className="p-4 mt-auto flex flex-col gap-2">
+                <a
+                    href="https://buymeacoffee.com/undeadundead"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center bg-yellow-400 text-black rounded-xl text-[14px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#b45309] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#b45309] whitespace-nowrap leading-none no-underline"
+                    style={{ padding: '8px 12px 7px 12px' }}
+                >
+                    <span>☕ {t('sidebar.sponsor')}</span>
+                </a>
                 <button
                     onClick={handleLogout}
                     className="w-full flex items-center justify-center bg-white text-black rounded-xl text-[14px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
-                    style={{ padding: '5px 12px 4px 12px' }}
+                    style={{ padding: '8px 12px 7px 12px' }}
                 >
                     <span>{t('sidebar.logout')}</span>
                 </button>

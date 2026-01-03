@@ -239,6 +239,7 @@
         "dashboard": "Status",
         "inbounds": "Inbounds",
         "settings": "Settings",
+        "sponsor": "Sponsor",
         "logout": "Logout"
     },
     "common": {

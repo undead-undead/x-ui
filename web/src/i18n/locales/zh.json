@@ -239,6 +239,7 @@
         "dashboard": "系统状态",
         "inbounds": "节点列表",
         "settings": "面板设置",
+        "sponsor": "赞助项目",
         "logout": "注销退出"
     },
     "common": {
