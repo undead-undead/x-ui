@@ -13,6 +13,13 @@ import { downloadFile, generateTimestampedFilename } from '../utils/fileUtils';
  */
 export const sysApi = {
     /**
+     * 更新面板配置 (.env)
+     */
+    updateConfig: async (webRoot: string, port: number): Promise<ApiResponse> => {
+        return (await apiClient.post<ApiResponse>(API_PATHS.SERVER_UPDATE_CONFIG, { webRoot, port })).data;
+    },
+
+    /**
      * 获取系统实时状态
      */
     getSystemStatus: async (): Promise<ApiSysStatus> => {

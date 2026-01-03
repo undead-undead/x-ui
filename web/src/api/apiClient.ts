@@ -20,6 +20,7 @@ export const API_PATHS = {
     SERVER_GET_LOGS: '/server/getLogs',
     SERVER_EXPORT_DB: '/server/export-db',
     SERVER_IMPORT_DB: '/server/import-db',
+    SERVER_UPDATE_CONFIG: '/server/updateConfig',
     SERVER_XRAY_RELEASES: '/server/xrayReleases',
     // Inbound 相关
     INBOUNDS: '/inbounds',

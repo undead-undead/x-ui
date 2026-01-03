@@ -61,28 +61,43 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 
 
         // 保存配置
+        // 保存配置
         const updatedPanel = { ...panel, webRoot: normalizedWebRoot };
         set({
             panel: updatedPanel,
             savedPanel: updatedPanel
         });
 
-        // 构造新地址
-        const protocol = window.location.protocol;
-        const hostname = window.location.hostname;
-        const newPort = panel.port; // 使用用户刚设置的新端口
-        const fullUrl = `${protocol}//${hostname}:${newPort}${normalizedWebRoot}`;
+        // 异步调用后端更新 .env
+        (async () => {
+            try {
+                const { sysApi } = await import('../api/system');
+                await sysApi.updateConfig(normalizedWebRoot, panel.port);
+            } catch (e) {
+                console.error("Failed to update backend config:", e);
+                // 即使后端更新失败，我们也继续跳转流程，或者给个警告？
+                // 最好的做法是如果失败就不要跳转
+                useDialogStore.getState().showAlert("后端配置写入失败，请检查日志", "错误");
+                return;
+            }
 
-        // 提示并跳转
-        useDialogStore.getState().showAlert(
-            `配置已保存！\n\n页面将在 2 秒后跳转到：\n${fullUrl}\n\n⚠️ 请记住新地址！\n\n注意：如果您在云服务器上修改了端口，请务必更新防火墙规则！`,
-            "保存成功 - 即将跳转"
-        );
+            // 构造新地址
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const newPort = panel.port; // 使用用户刚设置的新端口
+            const fullUrl = `${protocol}//${hostname}:${newPort}${normalizedWebRoot}`;
 
-        // 2秒后跳转
-        setTimeout(() => {
-            window.location.href = fullUrl;
-        }, 2000);
+            // 提示并跳转
+            useDialogStore.getState().showAlert(
+                `配置已保存并写入后台！\n\n面板服务可能需要重启生效。\n页面将在 3 秒后尝试跳转到：\n${fullUrl}\n\n⚠️ 请务必记住新地址！\n\n注意：如果您在云服务器上修改了端口，请务必更新防火墙规则！`,
+                "保存成功 - 即将跳转"
+            );
+
+            // 3秒后跳转
+            setTimeout(() => {
+                window.location.href = fullUrl;
+            }, 3000);
+        })();
     },
 
     // 仅处理用户名密码修改（带确认弹窗）

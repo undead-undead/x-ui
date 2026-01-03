@@ -194,3 +194,70 @@ pub async fn import_db(
         "No 'db' field found in request".to_string(),
     ))
 }
+
+#[derive(serde::Deserialize)]
+pub struct UpdateConfigReq {
+    pub web_root: String,
+    pub port: u16,
+}
+
+/// POST /api/server/updateConfig
+/// 更新面板配置 (端口和根路径) 并重写 .env
+pub async fn update_config(
+    _user: AuthUser,
+    Json(req): Json<UpdateConfigReq>,
+) -> ApiResult<ApiResponse<()>> {
+    let env_path = std::path::Path::new(".env");
+    let content = tokio::fs::read_to_string(env_path)
+        .await
+        .unwrap_or_default();
+
+    // 1. 规范化 WEB_ROOT
+    let mut clean_root = req.web_root.trim().to_string();
+    if !clean_root.starts_with('/') {
+        clean_root = format!("/{}", clean_root);
+    }
+    if !clean_root.ends_with('/') && clean_root != "/" {
+        clean_root = format!("{}/", clean_root);
+    }
+
+    // 2. 更新 .env 内容 (正则替换或追加)
+    // 简单起见，我们逐行处理
+    let mut new_lines = Vec::new();
+    let mut has_port = false;
+    let mut has_root = false;
+
+    for line in content.lines() {
+        if line.starts_with("SERVER_PORT=") {
+            new_lines.push(format!("SERVER_PORT={}", req.port));
+            has_port = true;
+        } else if line.starts_with("WEB_ROOT=") {
+            new_lines.push(format!("WEB_ROOT={}", clean_root));
+            has_root = true;
+        } else {
+            new_lines.push(line.to_string());
+        }
+    }
+
+    if !has_port {
+        new_lines.push(format!("SERVER_PORT={}", req.port));
+    }
+    if !has_root {
+        new_lines.push(format!("WEB_ROOT={}", clean_root));
+    }
+
+    let new_content = new_lines.join("\n");
+    if let Err(e) = tokio::fs::write(env_path, new_content).await {
+        return Err(crate::errors::ApiError::InternalError(format!(
+            "Failed to write .env: {}",
+            e
+        )));
+    }
+
+    // 3. 这里我们不重启服务，由前端在显示提示后，用户手动重启或前端发重启指令
+    // 但为了立即生效，通常需要重启程序。
+    // 在 systemd 环境下，修改面板端口通常需要重启整个服务。
+    // 我们这里只负责改文件。
+
+    Ok(ApiResponse::success_no_data("Config updated"))
+}

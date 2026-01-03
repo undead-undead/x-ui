@@ -43,6 +43,7 @@ pub fn create_router(pool: SqlitePool, monitor: SharedMonitor) -> Router {
         .route("/getLogs", post(handlers::system::get_logs))
         .route("/export-db", get(handlers::system::export_db))
         .route("/import-db", post(handlers::system::import_db))
+        .route("/updateConfig", post(handlers::system::update_config))
         // 安全改进: 中间件现在会验证 Token 是否在密码修改后失效
         .route_layer(middleware::from_fn_with_state(
             pool.clone(),
