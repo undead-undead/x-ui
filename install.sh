@@ -110,7 +110,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.15/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.16/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     i18n "install_deps"
@@ -331,7 +331,11 @@ EOF
     
     # 使用后端命令行工具设置账户
     cd $INSTALL_PATH
-    $BIN_PATH -u "$admin_user" -p "$admin_pass" 2>/dev/null
+    echo -e "${yellow}Setting up admin account...${plain}"
+    $BIN_PATH -u "$admin_user" -p "$admin_pass"
+    if [[ $? -ne 0 ]]; then
+        echo -e "${red}Failed to set account! Please check logs.${plain}"
+    fi
     
     # 获取公网IP
     public_ip=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me/ip || echo "YOUR_IP")
