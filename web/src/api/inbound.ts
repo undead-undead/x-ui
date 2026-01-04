@@ -32,7 +32,7 @@ export const inboundApi = {
      * 获取所有 Inbound
      */
     getInbounds: async (): Promise<ApiResponse<Inbound[]>> => {
-        const response = await apiClient.get<ApiResponse<Inbound[]>>('/inbound/list');
+        const response = await apiClient.get<ApiResponse<Inbound[]>>(`/inbound/list?_t=${Date.now()}`);
         return response.data;
     },
 
