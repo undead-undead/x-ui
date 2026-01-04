@@ -141,18 +141,31 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
 
     for line in stdout.lines() {
         let line = line.trim();
-        if line.starts_with("name:") {
-            if let Some(name_part) = line.split("name:").nth(1) {
-                current_name = name_part.trim().trim_matches('"').to_string();
+        if line.contains("name") {
+            // Find "content" or content
+            // Split by "name" first
+            if let Some(part) = line.split("name").nth(1) {
+                // part might be `: "..."` or `": "..."`
+                // Find first quote
+                if let Some(start) = part.find('"') {
+                    if let Some(end) = part[start + 1..].find('"') {
+                        current_name = part[start + 1..start + 1 + end].to_string();
+                    }
+                }
             }
-        } else if line.starts_with("value:") {
-            if let Some(value_str) = line.split("value:").nth(1) {
-                // value might be followed by '>' if on same line, or not.
-                // But typically: value: 123
-                let clean_val = value_str.trim().trim_end_matches('>').trim();
-                if let Ok(value) = clean_val.parse::<i64>() {
+        }
+
+        // Use 'if' instead of 'else if' to handle cases where name and value are on the same line
+        if line.contains("value") {
+            if let Some(part) = line.split("value").nth(1) {
+                // part might be `: 123` or `": 123`
+                // Filter out non-digits (allow negative? usually not for traffic)
+                let num_str: String = part.chars().filter(|c| c.is_ascii_digit()).collect();
+                if let Ok(value) = num_str.parse::<i64>() {
                     if !current_name.is_empty() {
                         stats.insert(current_name.clone(), value);
+                        // Reset current_name after insertion to prevent stale name usage
+                        current_name.clear();
                     }
                 }
             }
