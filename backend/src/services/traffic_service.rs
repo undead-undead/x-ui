@@ -142,45 +142,48 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
     tracing::info!("Xray API raw output preview: {}", preview);
 
     let mut stats = std::collections::HashMap::new();
-    let mut current_name = String::new();
-
-    // Output format is protobuf text format
-    // stat: <
-    //   name: "..."
-    //   value: ...
-    // >
-    // We need to parse this robustly.
+    let mut current_name: Option<String> = None;
+    let mut current_value: Option<i64> = None;
 
     for line in stdout.lines() {
         let line = line.trim();
+
+        // Reset state on new object start (JSON "{" or closing "}")
+        if line == "{" || line == "}," || line == "}" {
+            // If we have both name and value from previous object, insert before reset
+            if let (Some(name), Some(value)) = (&current_name, current_value) {
+                stats.insert(name.clone(), value);
+            }
+            current_name = None;
+            current_value = None;
+        }
+
+        // Extract name
         if line.contains("name") {
-            // Find "content" or content
-            // Split by "name" first
             if let Some(part) = line.split("name").nth(1) {
-                // part might be `: "..."` or `": "..."`
-                // Find first quote
                 if let Some(start) = part.find('"') {
                     if let Some(end) = part[start + 1..].find('"') {
-                        current_name = part[start + 1..start + 1 + end].to_string();
+                        current_name = Some(part[start + 1..start + 1 + end].to_string());
                     }
                 }
             }
         }
 
-        // Use 'if' instead of 'else if' to handle cases where name and value are on the same line
+        // Extract value
         if line.contains("value") {
             if let Some(part) = line.split("value").nth(1) {
-                // part might be `: 123` or `": 123`
-                // Filter out non-digits (allow negative? usually not for traffic)
                 let num_str: String = part.chars().filter(|c| c.is_ascii_digit()).collect();
                 if let Ok(value) = num_str.parse::<i64>() {
-                    if !current_name.is_empty() {
-                        stats.insert(current_name.clone(), value);
-                        // Reset current_name after insertion to prevent stale name usage
-                        current_name.clear();
-                    }
+                    current_value = Some(value);
                 }
             }
+        }
+
+        // Insert when we have both (handles same-line case)
+        if let (Some(name), Some(value)) = (&current_name, current_value) {
+            stats.insert(name.clone(), value);
+            current_name = None;
+            current_value = None;
         }
     }
 
