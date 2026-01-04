@@ -179,13 +179,6 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
                 }
             }
         }
-
-        // Insert when we have both (handles same-line case)
-        if let (Some(name), Some(value)) = (&current_name, current_value) {
-            stats.insert(name.clone(), value);
-            current_name = None;
-            current_value = None;
-        }
     }
 
     tracing::info!(
