@@ -135,3 +135,11 @@ pub async fn delete_inbound(pool: &SqlitePool, id: &str) -> ApiResult<()> {
         .await?;
     Ok(())
 }
+
+pub async fn reset_inbound_traffic(pool: &SqlitePool, id: &str) -> ApiResult<()> {
+    sqlx::query("UPDATE inbounds SET up = 0, down = 0 WHERE id = ?")
+        .bind(id)
+        .execute(pool)
+        .await?;
+    Ok(())
+}

@@ -53,6 +53,7 @@ pub struct PolicyConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct LevelPolicy {
     #[serde(default)]
     pub stats_user_uplink: bool,
@@ -71,6 +72,7 @@ pub struct LevelPolicy {
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct SystemPolicy {
     #[serde(default)]
     pub stats_inbound_uplink: bool,

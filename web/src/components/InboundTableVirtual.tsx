@@ -79,10 +79,15 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
                 </div>
 
                 {/* 流量 */}
-                <div className="flex-[1.5] min-w-0 px-4">
-                    <div className="flex flex-col gap-1 text-[13px] font-bold tabular-nums">
-                        <span className="text-gray-600">↑ {formatTraffic(item.up)}</span>
-                        <span className="text-gray-600">↓ {formatTraffic(item.down)}</span>
+                <div className="flex-[2] min-w-0 px-4">
+                    <div className="flex flex-col gap-0.5 text-[12px] font-bold tabular-nums">
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-600">↑ {formatTraffic(item.up)}</span>
+                            <span className="text-gray-600">↓ {formatTraffic(item.down)}</span>
+                        </div>
+                        <div className="text-[11px] text-gray-400">
+                            / <span className="text-blue-500">{item.total > 0 ? formatTraffic(item.total) : '∞'}</span>
+                        </div>
                     </div>
                 </div>
 

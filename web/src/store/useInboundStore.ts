@@ -86,13 +86,18 @@ export const useInboundStore = create<InboundStore>((set, get) => ({
     },
 
     resetTraffic: async (id: string) => {
-        // 后端暂未直接提供重置流量 API，这里暂且只更新本地展示
-        // 实际生产中应添加 api.resetTraffic(id)
-        set((state) => ({
-            inbounds: state.inbounds.map((item) =>
-                item.id === id ? { ...item, up: 0, down: 0 } : item
-            )
-        }));
+        try {
+            const res = await inboundApi.resetTraffic(id);
+            if (res.success) {
+                set((state) => ({
+                    inbounds: state.inbounds.map((item) =>
+                        item.id === id ? { ...item, up: 0, down: 0 } : item
+                    )
+                }));
+            }
+        } catch (e) {
+            console.error(e);
+        }
     },
 
     setInbounds: (data) => set({ inbounds: data }),

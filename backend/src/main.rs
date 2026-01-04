@@ -156,6 +156,9 @@ async fn main() -> anyhow::Result<()> {
         tracing::info!("初始 Xray 核心已成功启动或更新");
     }
 
+    // 启动流量统计任务
+    services::traffic_service::start_traffic_stats_task(pool.clone(), monitor.clone());
+
     // CORS 配置
     #[cfg(debug_assertions)]
     let cors_layer = match std::env::var("SERVER_HOST") {

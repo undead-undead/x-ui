@@ -278,7 +278,12 @@ export const AddInboundModal = () => {
                                 <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.total_traffic')}:</label>
                                 <input
                                     value={form.totalTraffic}
-                                    onChange={(e) => form.setTotalTraffic(e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d*$/.test(val)) {
+                                            form.setTotalTraffic(val);
+                                        }
+                                    }}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                     placeholder={t('inbound.modal.total_traffic_placeholder')}
                                 />

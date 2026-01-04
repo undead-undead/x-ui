@@ -89,10 +89,10 @@ pub struct DeleteInboundRequest {
 pub struct ToggleInboundRequest {
     pub id: String,
 }
+*/
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ResetTrafficRequest {
     pub id: String,
 }
-*/

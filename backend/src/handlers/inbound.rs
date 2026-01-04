@@ -1,6 +1,8 @@
 use crate::errors::ApiResult;
 use crate::middleware::auth::AuthUser;
-use crate::models::inbound::{CreateInboundRequest, DeleteInboundRequest, UpdateInboundRequest};
+use crate::models::inbound::{
+    CreateInboundRequest, DeleteInboundRequest, ResetTrafficRequest, UpdateInboundRequest,
+};
 use crate::services::{inbound_service, system_service::SharedMonitor, xray_service};
 use crate::utils::{reality, response::ApiResponse};
 use axum::extract::{Extension, Json, State};
@@ -70,4 +72,13 @@ pub async fn check_reality(
         .await
         .map_err(|e| crate::errors::ApiError::InternalError(e.to_string()))?;
     Ok(ApiResponse::success(result))
+}
+
+pub async fn reset_traffic(
+    _user: AuthUser,
+    Extension(pool): Extension<SqlitePool>,
+    Json(payload): Json<ResetTrafficRequest>,
+) -> ApiResult<ApiResponse<()>> {
+    inbound_service::reset_inbound_traffic(&pool, &payload.id).await?;
+    Ok(ApiResponse::success_no_data("Traffic reset successfully"))
 }

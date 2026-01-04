@@ -28,6 +28,13 @@ export const InboundPage = () => {
     // 页面加载时获取最新数据
     useEffect(() => {
         fetchInbounds();
+
+        // 开启 5s 自动刷新以更新流量
+        const timer = setInterval(() => {
+            fetchInbounds();
+        }, 5000);
+
+        return () => clearInterval(timer);
     }, [fetchInbounds]);
 
     // 性能优化：使用防抖，减少 90% 的过滤计算

@@ -52,6 +52,8 @@ const InboundRow = memo<InboundRowProps>(({ item, onToggle, onDelete, onReset, o
                         <span className="text-gray-600">{formatTraffic(item.up || 0)}</span>
                         <span className="text-gray-400 ml-1">↓</span>
                         <span className="text-gray-600">{formatTraffic(item.down || 0)}</span>
+                        <span className="text-gray-300 ml-1">/</span>
+                        <span className="text-blue-500 ml-1">{item.total > 0 ? formatTraffic(item.total) : '∞'}</span>
                     </div>
                 </div>
             </td>

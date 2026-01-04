@@ -36,9 +36,23 @@ pub async fn apply_config(pool: &SqlitePool, monitor: SharedMonitor) -> ApiResul
             "LoggerService".to_string(),
             "StatsService".to_string(),
         ],
-    };
+    }; // Enable StatsService
 
     // 2.3 转换入站节点
+    // 必须添加 API 监听端口用于统计查询 (dokodemo-door)
+    config.inbounds.push(InboundConfig {
+        tag: "api".to_string(),
+        port: 10085,
+        protocol: "dokodemo-door".to_string(),
+        listen: Some("127.0.0.1".to_string()),
+        settings: Some(serde_json::json!({
+            "address": "127.0.0.1"
+        })),
+        stream_settings: None,
+        sniffing: None,
+        allocate: None,
+    });
+
     for inbound in inbounds {
         // 使用 inbound 自己的 tag,或生成默认 tag
         let tag = inbound
@@ -75,9 +89,45 @@ pub async fn apply_config(pool: &SqlitePool, monitor: SharedMonitor) -> ApiResul
         config.inbounds.push(inbound_config);
     }
 
+    // Enable Stats
+    config.stats = Some(StatsConfig {});
+
+    // Configure Policy for stats collection
+    let mut levels = std::collections::HashMap::new();
+    levels.insert(
+        "0".to_string(),
+        LevelPolicy {
+            stats_user_uplink: true,
+            stats_user_downlink: true,
+            handshake: 4,
+            conn_idle: 300,
+            uplink_only: 2,
+            downlink_only: 5,
+            buffer_size: 512,
+        },
+    );
+
+    config.policy = Some(PolicyConfig {
+        levels,
+        system: Some(SystemPolicy {
+            stats_inbound_uplink: true,
+            stats_inbound_downlink: true,
+            stats_outbound_uplink: true,
+            stats_outbound_downlink: true,
+        }),
+    });
+
     // 2.4 出站配置 (默认 direct)
     config.outbounds.push(OutboundConfig {
         tag: "direct".to_string(),
+        protocol: "freedom".to_string(),
+        settings: None,
+        stream_settings: None,
+    });
+
+    // Add 'api' outbound for internal routing
+    config.outbounds.push(OutboundConfig {
+        tag: "api".to_string(),
         protocol: "freedom".to_string(),
         settings: None,
         stream_settings: None,
@@ -91,9 +141,20 @@ pub async fn apply_config(pool: &SqlitePool, monitor: SharedMonitor) -> ApiResul
     });
 
     // 2.5 路由配置
+    // IMPORTANT: precise routing for API traffic to prevent infinite loops
+    let mut rules = vec![];
+
+    // 核心规则：将带有 "api" 标签的入站流量路由到 "api" 出站
+    rules.push(RoutingRule {
+        rule_type: "field".to_string(),
+        inbound_tag: Some(vec!["api".to_string()]),
+        outbound_tag: Some("api".to_string()),
+        ..Default::default()
+    });
+
     config.routing = Some(RoutingConfig {
         domain_strategy: "IPIfNonMatch".to_string(),
-        rules: vec![],
+        rules,
     });
 
     // 3. 序列化配置

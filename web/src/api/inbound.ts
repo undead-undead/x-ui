@@ -85,6 +85,11 @@ export const inboundApi = {
         const response = await apiClient.post<ApiResponse<{ is_valid: boolean, has_tls13: boolean, key_exchange: string, latency: number, message: string }>>('/inbound/check-reality', { domain });
         return response.data;
     },
+
+    resetTraffic: async (id: string): Promise<ApiResponse<void>> => {
+        const response = await apiClient.post<ApiResponse<void>>('/inbound/reset-traffic', { id });
+        return response.data;
+    },
 };
 
 
