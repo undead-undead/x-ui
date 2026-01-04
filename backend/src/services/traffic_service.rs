@@ -43,9 +43,12 @@ async fn update_traffic_stats(pool: &SqlitePool, monitor: SharedMonitor) -> ApiR
 
     let stats_map = query_all_xray_stats(&xray_bin).await.unwrap_or_default();
 
+    tracing::info!("Traffic stats query returned {} entries", stats_map.len());
     if stats_map.is_empty() && !inbounds.is_empty() {
-        // If we got no stats, maybe Xray API is down or just started.
-        tracing::debug!("No stats retrieved from Xray API");
+        tracing::warn!(
+            "No stats retrieved from Xray API despite having {} enabled inbounds",
+            inbounds.len()
+        );
     }
 
     for inbound in inbounds {
@@ -129,6 +132,15 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
+
+    // Diagnostic logging
+    let preview = if stdout.len() > 500 {
+        &stdout[..500]
+    } else {
+        &stdout[..]
+    };
+    tracing::info!("Xray API raw output preview: {}", preview);
+
     let mut stats = std::collections::HashMap::new();
     let mut current_name = String::new();
 
