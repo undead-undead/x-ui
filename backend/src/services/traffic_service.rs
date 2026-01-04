@@ -188,5 +188,13 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
         }
     }
 
+    tracing::info!(
+        "Parser completed. Total unique keys in map: {}, checking for duplicates...",
+        stats.len()
+    );
+    for (key, val) in stats.iter().take(5) {
+        tracing::debug!("Sample entry: {} = {}", key, val);
+    }
+
     Ok(stats)
 }
