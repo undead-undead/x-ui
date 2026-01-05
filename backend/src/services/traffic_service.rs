@@ -176,11 +176,14 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
                 // or with trailing comma: ": "outbound>>>blocked>>>traffic>>>downlink","
                 // Find first quote (opening)
                 if let Some(first_quote_pos) = part.find('"') {
-                    // Find last quote (closing) by searching from the end
-                    // This handles both cases: with and without trailing comma
-                    let search_str = &part[first_quote_pos + 1..];
-                    if let Some(relative_last_quote) = search_str.rfind('"') {
-                        current_name = Some(search_str[..relative_last_quote].to_string());
+                    // Find last quote (closing) in the entire part string
+                    if let Some(last_quote_pos) = part.rfind('"') {
+                        // Make sure they're different positions
+                        if last_quote_pos > first_quote_pos {
+                            // Extract content between the two quotes
+                            current_name =
+                                Some(part[first_quote_pos + 1..last_quote_pos].to_string());
+                        }
                     }
                 }
             }
