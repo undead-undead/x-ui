@@ -171,21 +171,15 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
 
         // Extract name
         if line.contains("name") {
-            if let Some(part) = line.split("name").nth(1) {
-                // part is like: ": "outbound>>>blocked>>>traffic>>>downlink""
-                // or with trailing comma: ": "outbound>>>blocked>>>traffic>>>downlink","
-                // Find first quote (opening)
-                if let Some(first_quote_pos) = part.find('"') {
-                    // Find last quote (closing) in the entire part string
-                    if let Some(last_quote_pos) = part.rfind('"') {
-                        // Make sure they're different positions
-                        if last_quote_pos > first_quote_pos {
-                            // Extract content between the two quotes
-                            current_name =
-                                Some(part[first_quote_pos + 1..last_quote_pos].to_string());
-                        }
-                    }
-                }
+            // Line format: "name": "value" or "name": "value",
+            // Split by quotes and get the parts
+            let parts: Vec<&str> = line.split('"').collect();
+            // parts[0] = whitespace + "name"
+            // parts[1] = : (between "name" and first value quote)
+            // parts[2] = : (empty or colon+space)
+            // parts[3] = actual value
+            if parts.len() >= 4 {
+                current_name = Some(parts[3].to_string());
             }
         }
 
