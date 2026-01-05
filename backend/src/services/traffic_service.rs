@@ -64,6 +64,16 @@ async fn update_traffic_stats(pool: &SqlitePool, monitor: SharedMonitor) -> ApiR
         let uplink = stats_map.get(&up_key).cloned().unwrap_or(0);
         let downlink = stats_map.get(&down_key).cloned().unwrap_or(0);
 
+        tracing::info!(
+            "Node '{}' (tag={}): looking for keys '{}' and '{}', found uplink={}, downlink={}",
+            inbound.remark,
+            tag,
+            up_key,
+            down_key,
+            uplink,
+            downlink
+        );
+
         if uplink > 0 || downlink > 0 {
             let new_up = inbound.up + uplink;
             let new_down = inbound.down + downlink;
