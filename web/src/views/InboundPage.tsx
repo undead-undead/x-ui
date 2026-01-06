@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useInboundStore } from '../store/useInboundStore';
 import { InboundTable } from '../components/InboundTable';
 import { InboundTableVirtual } from '../components/InboundTableVirtual';
-import { Plus, CheckCircle2, XCircle, Search } from 'lucide-react';
+import { Plus, CheckCircle2, XCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalStore } from '../store/useModalStore';
 import { formatTraffic } from '../utils/format';
@@ -24,6 +24,43 @@ export const InboundPage = () => {
     const [realityDomain, setRealityDomain] = useState('');
     const [isChecking, setIsChecking] = useState(false);
     const [checkResult, setCheckResult] = useState<DomainCheckResult | null>(null);
+
+    // 流量统计基准点（存储在 localStorage）
+    const [trafficBaseline, setTrafficBaseline] = useState<{ upload: number; download: number }>(() => {
+        const saved = localStorage.getItem('traffic_baseline');
+        return saved ? JSON.parse(saved) : { upload: 0, download: 0 };
+    });
+
+    // 计算当前总流量（所有节点的实际流量）
+    const currentTotals = useMemo(() => {
+        return inbounds.reduce(
+            (acc, inbound) => ({
+                upload: acc.upload + (inbound.up || 0),
+                download: acc.download + (inbound.down || 0),
+            }),
+            { upload: 0, download: 0 }
+        );
+    }, [inbounds]);
+
+    // 计算显示的流量（当前总流量 - 基准点）
+    const { totalUpload, totalDownload } = useMemo(() => {
+        const upload = Math.max(0, currentTotals.upload - trafficBaseline.upload);
+        const download = Math.max(0, currentTotals.download - trafficBaseline.download);
+        return {
+            totalUpload: formatTraffic(upload),
+            totalDownload: formatTraffic(download),
+        };
+    }, [currentTotals, trafficBaseline]);
+
+    // 重置流量统计（将当前流量设为新的基准点）
+    const handleResetTrafficStats = () => {
+        const newBaseline = {
+            upload: currentTotals.upload,
+            download: currentTotals.download,
+        };
+        setTrafficBaseline(newBaseline);
+        localStorage.setItem('traffic_baseline', JSON.stringify(newBaseline));
+    };
 
     // 页面加载时获取最新数据
     useEffect(() => {
@@ -128,36 +165,60 @@ export const InboundPage = () => {
                             />
                         </div>
 
-                        {/* Stats Section with Reality Domain Checker */}
-                        <div className="flex items-center gap-6">
+                        {/* Center Section: Traffic Statistics */}
+                        <div className="flex-1 flex justify-center">
+                            {/* Traffic Statistics */}
+                            <div className="flex items-center gap-3 w-64 h-11 px-5 bg-white border border-black rounded-xl shadow-[0_1px_0_0_#94a3b8]">
+                                <div className="flex flex-col flex-1">
+                                    <span className="text-[10px] text-gray-500 font-medium leading-tight">上传总流量</span>
+                                    <span className="text-[13px] font-bold text-gray-700 tabular-nums">{totalUpload}</span>
+                                </div>
+                                <div className="w-px h-6 bg-gray-300"></div>
+                                <div className="flex flex-col flex-1">
+                                    <span className="text-[10px] text-gray-500 font-medium leading-tight">下载总流量</span>
+                                    <span className="text-[13px] font-bold text-gray-700 tabular-nums">{totalDownload}</span>
+                                </div>
+                                <button
+                                    onClick={handleResetTrafficStats}
+                                    className="px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
+                                    style={{ padding: '5px 24px 4px 24px' }}
+                                    title="重置流量统计"
+                                >
+                                    重置
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Right Section: Reality Domain Checker */}
+                        <div className="flex items-center gap-2">
                             {/* Reality Domain Checker */}
-                            <div className="relative flex items-center gap-2">
+                            <div className="relative flex items-center">
                                 <input
                                     type="text"
                                     value={realityDomain}
                                     onChange={(e) => setRealityDomain(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleCheckDomain()}
                                     placeholder={t('inbound.reality_check_placeholder')}
-                                    className="w-64 h-11 px-5 pr-12 bg-white border border-gray-300 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-black placeholder:text-gray-400 font-medium text-[13px]"
+                                    className="w-72 h-11 px-5 pr-[120px] bg-white border border-black rounded-xl outline-none focus:ring-0 transition-all text-black placeholder:text-gray-300 font-bold text-[13px] shadow-[0_1px_0_0_#94a3b8]"
                                 />
 
                                 {/* 检测按钮 */}
                                 <button
                                     onClick={handleCheckDomain}
                                     disabled={!realityDomain.trim() || isChecking}
-                                    className="h-11 px-4 bg-blue-500 text-white rounded-xl text-[13px] font-bold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                    className="absolute right-3 top-[10px] bg-white text-black border border-black rounded-xl text-[13px] font-bold hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_1px_0_0_#94a3b8] transition-all shadow-[0_1px_0_0_#94a3b8] flex items-center leading-none"
+                                    style={{ padding: '5px 24px 4px 24px' }}
                                 >
-                                    <Search size={16} />
                                     {isChecking ? t('inbound.checking') : t('inbound.check')}
                                 </button>
 
                                 {/* 状态图标 */}
                                 {displayResult && !isChecking && (
-                                    <div className="absolute left-64 top-1/2 -translate-y-1/2 ml-[-32px]">
+                                    <div className="absolute right-[100px] top-1/2 -translate-y-1/2">
                                         {displayResult.isValid ? (
-                                            <CheckCircle2 size={18} className="text-green-500" />
+                                            <CheckCircle2 size={18} className="text-black" />
                                         ) : (
-                                            <XCircle size={18} className="text-red-500" />
+                                            <XCircle size={18} className="text-gray-500" />
                                         )}
                                     </div>
                                 )}
@@ -165,10 +226,10 @@ export const InboundPage = () => {
                                 {/* 结果提示 */}
                                 {displayResult && !isChecking && (
                                     <div className={`absolute top-full left-0 right-0 mt-2 p-3 rounded-lg text-xs font-medium shadow-lg z-50 ${displayResult.warning
-                                        ? 'bg-orange-50 border border-orange-300 text-orange-800'
+                                        ? 'bg-gray-100 border border-gray-400 text-gray-800'
                                         : displayResult.isValid
-                                            ? 'bg-green-50 border border-green-200 text-green-700'
-                                            : 'bg-red-50 border border-red-200 text-red-700'
+                                            ? 'bg-white border border-black text-black'
+                                            : 'bg-gray-100 border border-gray-400 text-gray-700'
                                         }`}>
                                         <div className="font-bold mb-1">{displayResult.message}</div>
                                         {displayResult.details && (

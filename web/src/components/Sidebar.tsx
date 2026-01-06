@@ -69,7 +69,7 @@ export const Sidebar = memo(() => {
                     href="https://buymeacoffee.com/undeadundead"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center bg-yellow-400 text-black rounded-xl text-[14px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#b45309] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#b45309] whitespace-nowrap leading-none no-underline"
+                    className="w-full flex items-center justify-center bg-gray-100 text-gray-700 rounded-xl text-[14px] font-bold border border-gray-300 hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none no-underline"
                     style={{ padding: '8px 12px 7px 12px' }}
                 >
                     <span>☕ {t('sidebar.sponsor')}</span>

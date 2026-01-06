@@ -219,22 +219,6 @@ export const Dashboard = () => {
                             </div>
                         </StatusBar>
 
-                        <StatusBar>
-                            <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-2 text-[14px] font-bold">
-                                    <span className="text-gray-900">{t('dashboard.total_up')}:</span>
-                                    <span className="tabular-nums text-gray-400 font-medium">
-                                        {sysStatus.netTraffic.totalUp}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[14px] font-bold">
-                                    <span className="text-gray-900">{t('dashboard.total_down')}:</span>
-                                    <span className="tabular-nums text-gray-400 font-medium">
-                                        {sysStatus.netTraffic.totalDown}
-                                    </span>
-                                </div>
-                            </div>
-                        </StatusBar>
                     </div >
                 </div >
             </div >
