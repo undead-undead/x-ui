@@ -26,8 +26,10 @@ pub async fn add_inbound(
     let port = payload.port;
     let inbound = inbound_service::add_inbound(&pool, payload).await?;
 
-    tokio::spawn(async move {
+    tokio::task::spawn_blocking(move || {
+        tracing::info!("Starting background firewall task for port {}", port);
         crate::utils::firewall::open_port(port as u16);
+        tracing::info!("Finished background firewall task for port {}", port);
     });
 
     xray_service::apply_config(&pool, monitor).await?;
@@ -45,8 +47,10 @@ pub async fn update_inbound(
     let inbound = inbound_service::update_inbound(&pool, payload).await?;
 
     if let Some(p) = port {
-        tokio::spawn(async move {
+        tokio::task::spawn_blocking(move || {
+            tracing::info!("Starting background firewall task for port {}", p);
             crate::utils::firewall::open_port(p as u16);
+            tracing::info!("Finished background firewall task for port {}", p);
         });
     }
 
