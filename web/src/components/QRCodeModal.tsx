@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useTranslation } from 'react-i18next';
 import { X, Share2, ClipboardCheck } from 'lucide-react';
 import { useQRCodeStore } from '../store/useQRCodeStore';
 import { generateShareLink, copyToClipboard } from '../utils/linkUtils';
@@ -32,13 +33,12 @@ export const QRCodeModal: React.FC = () => {
             />
 
             <div className="relative w-[340px] bg-[#FDFDFD] border border-gray-100 rounded-[44px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-400">
-
                 <div className="flex items-center justify-between p-8 pb-4">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-black rounded-[20px] flex items-center justify-center text-white shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)]">
                             <Share2 size={24} strokeWidth={2.5} />
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900 tracking-tight">Scan QR Code</h2>
+                        <h2 className="text-xl font-bold text-gray-900 tracking-tight">{useTranslation().t('qrcode.title')}</h2>
                     </div>
                     <button
                         onClick={close}
@@ -72,18 +72,18 @@ export const QRCodeModal: React.FC = () => {
                                 `}
                             >
                                 {copied ? <ClipboardCheck size={18} /> : <div className="w-4 h-4" />}
-                                <span>{copied ? 'Copied' : 'Copy Link'}</span>
+                                <span>{copied ? useTranslation().t('qrcode.copy_success') : useTranslation().t('qrcode.copy_btn')}</span>
                             </button>
                             {!copied && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[80%] h-1 bg-gray-100 rounded-full -z-10 blur-[2px]"></div>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                             <div className="py-4 px-2 rounded-[28px] bg-gray-50/50 border border-transparent hover:border-gray-100 transition-all flex flex-col items-center justify-center gap-1">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Protocol</span>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{useTranslation().t('qrcode.protocol')}</span>
                                 <span className="text-[14px] font-bold text-gray-900 uppercase">{inbound.protocol}</span>
                             </div>
                             <div className="py-4 px-2 rounded-[28px] bg-gray-50/50 border border-transparent hover:border-gray-100 transition-all flex flex-col items-center justify-center gap-1">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Port</span>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{useTranslation().t('qrcode.port')}</span>
                                 <span className="text-[14px] font-bold text-gray-900">{inbound.port}</span>
                             </div>
                         </div>
@@ -91,9 +91,8 @@ export const QRCodeModal: React.FC = () => {
                 </div>
 
                 <div className="pb-8 text-center px-8">
-                    <p className="text-[12px] font-bold text-gray-300 leading-relaxed uppercase tracking-tighter">
-                        Use a client that supports V2Ray protocol<br />
-                        and scan the QR code above to import.
+                    <p className="text-[12px] font-bold text-gray-300 leading-relaxed uppercase tracking-tighter whitespace-pre-line">
+                        {useTranslation().t('qrcode.tip')}
                     </p>
                 </div>
             </div>
