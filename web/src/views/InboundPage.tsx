@@ -215,7 +215,7 @@ export const InboundPage = () => {
                                 )}
                             </div>
 
-                            <div className="flex items-center gap-6 text-[13px] font-bold text-gray-500">
+                            <div className="flex items-center gap-6">
                                 <button
                                     onClick={() => openBackupModal()}
                                     className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
