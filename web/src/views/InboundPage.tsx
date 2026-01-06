@@ -79,12 +79,6 @@ export const InboundPage = () => {
         );
     }, [inbounds, debouncedQuery]);
 
-    const totalTraffic = useMemo(() => {
-        const total = inbounds.reduce((sum, inbound) => {
-            return sum + (inbound.up || 0) + (inbound.down || 0);
-        }, 0);
-        return formatTraffic(total);
-    }, [inbounds]);
 
     const quickResult = useMemo(() => {
         if (!realityDomain.trim()) {
@@ -221,7 +215,6 @@ export const InboundPage = () => {
 
                             <div className="flex items-center gap-6 text-[13px] font-bold text-gray-500">
                                 <span className="tabular-nums">{t('inbound.total_count')}: {inbounds.length}</span>
-                                <span className="tabular-nums">{t('inbound.total_traffic')}: {totalTraffic}</span>
                             </div>
                         </div>
                     </div>
