@@ -168,12 +168,12 @@ export const InboundTable: React.FC<InboundTableProps> = memo(({ inbounds, isEmb
                 <table className="w-full min-w-[1000px] text-left border-collapse whitespace-nowrap">
                     <thead>
                         <tr className="border-b border-gray-200 bg-gray-50">
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">{t('inbound.table.remark')}</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">{t('inbound.table.type')}</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">{t('inbound.table.port')}</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">{t('inbound.table.traffic')}</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500 text-center">{t('inbound.table.status')}</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">
+                            <th className="px-8 py-5 text-[13px] font-bold tracking-tight text-gray-500">{t('inbound.table.remark')}</th>
+                            <th className="px-8 py-5 text-[13px] font-bold tracking-tight text-gray-500">{t('inbound.table.type')}</th>
+                            <th className="px-8 py-5 text-[13px] font-bold tracking-tight text-gray-500">{t('inbound.table.port')}</th>
+                            <th className="px-8 py-5 text-[13px] font-bold tracking-tight text-gray-500">{t('inbound.table.traffic')}</th>
+                            <th className="px-8 py-5 text-[13px] font-bold tracking-tight text-gray-500 text-center">{t('inbound.table.status')}</th>
+                            <th className="px-8 py-5 text-[13px] font-bold tracking-tight text-gray-500">
                                 <div className="flex justify-end pr-2">
                                     <div className="w-10 flex items-center justify-center">
                                         {t('inbound.table.actions')}

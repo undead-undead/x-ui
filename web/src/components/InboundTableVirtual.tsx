@@ -208,34 +208,34 @@ export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ i
                         <div className="sticky top-0 z-30 bg-gray-50 border-b border-gray-200">
                             <div className="flex items-center py-5 px-8">
                                 <div className="flex-[2.5] min-w-0">
-                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                    <span className="text-[13px] font-bold tracking-tight text-gray-500">
                                         {t('inbound.table.remark')}
                                     </span>
                                 </div>
                                 <div className="flex-1 min-w-0 px-4 text-center">
-                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                    <span className="text-[13px] font-bold tracking-tight text-gray-500">
                                         {t('inbound.table.type')}
                                     </span>
                                 </div>
                                 <div className="flex-1 min-w-0 px-4 text-center">
-                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                    <span className="text-[13px] font-bold tracking-tight text-gray-500">
                                         {t('inbound.table.port')}
                                     </span>
                                 </div>
                                 <div className="flex-[1.5] min-w-0 px-4">
-                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                    <span className="text-[13px] font-bold tracking-tight text-gray-500">
                                         {t('inbound.table.traffic')}
                                     </span>
                                 </div>
                                 <div className="flex-1 min-w-0 px-4 text-center">
-                                    <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                    <span className="text-[13px] font-bold tracking-tight text-gray-500">
                                         {t('inbound.table.status')}
                                     </span>
                                 </div>
                                 <div className="flex-2 min-w-0 px-4">
                                     <div className="flex justify-end pr-2">
                                         <div className="w-10 flex items-center justify-center">
-                                            <span className="text-[12px] font-bold tracking-tight text-gray-500">
+                                            <span className="text-[13px] font-bold tracking-tight text-gray-500">
                                                 {t('inbound.table.actions')}
                                             </span>
                                         </div>
