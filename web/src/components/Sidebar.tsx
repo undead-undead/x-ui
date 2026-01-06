@@ -6,10 +6,8 @@ import { useTranslation } from 'react-i18next';
 export const Sidebar = memo(() => {
     const { t } = useTranslation();
 
-    // 性能优化：使用细粒度选择器
     const logout = useAuthStore((state) => state.logout);
 
-    // 性能优化：使用 useMemo 缓存 menuItems 数组
     const menuItems = useMemo(() => [
         {
             path: '/',
@@ -25,7 +23,6 @@ export const Sidebar = memo(() => {
         },
     ], [t]);
 
-    // 性能优化：使用 useCallback 缓存回调函数
     const handleLogout = useCallback(() => {
         logout();
     }, [logout]);

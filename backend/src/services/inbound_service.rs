@@ -12,7 +12,6 @@ pub async fn get_all_inbounds(pool: &SqlitePool) -> ApiResult<Vec<Inbound>> {
 pub async fn add_inbound(pool: &SqlitePool, req: CreateInboundRequest) -> ApiResult<Inbound> {
     let now = chrono::Local::now().naive_local();
 
-    // settings defaults
     let settings_json = req
         .settings
         .map(|v| v.to_string())
@@ -29,7 +28,6 @@ pub async fn add_inbound(pool: &SqlitePool, req: CreateInboundRequest) -> ApiRes
 
     let enable = req.enable.unwrap_or(true);
 
-    // 生成默认 tag(如果未提供)
     let tag = req.tag.or_else(|| {
         Some(format!(
             "inbound-{}",
@@ -70,22 +68,10 @@ pub async fn add_inbound(pool: &SqlitePool, req: CreateInboundRequest) -> ApiRes
 pub async fn update_inbound(pool: &SqlitePool, req: UpdateInboundRequest) -> ApiResult<Inbound> {
     let now = chrono::Local::now().naive_local();
 
-    // We need to fetch existing to update only provided fields?
-    // Or SQL UPDATE with COALESCE? Or dynamic query building.
-    // Since SQLx doesn't support dynamic query building easily, we might fetch first or assume full update if simplified.
-    // However, UpdateInboundRequest has options.
-
-    // Let's use a simpler approach: update fields if they are Some.
-    // This is verbose in raw SQL.
-    // For now, let's assume we do 1 query with COALESCE(?, field).
-
     let settings_str = req.settings.map(|v| v.to_string());
     let stream_settings_str = req.stream_settings.map(|v| v.to_string());
     let sniffing_str = req.sniffing.map(|v| v.to_string());
     let allocate_str = req.allocate.map(|v| v.to_string());
-
-    // Note: COALESCE(NULL, file) in SQL keeps old value if we pass NULL?
-    // No, standard UPDATE is `col = COALESCE(?, col)`.
 
     let inbound = sqlx::query_as::<_, Inbound>(
         r#"

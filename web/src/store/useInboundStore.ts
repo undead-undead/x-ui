@@ -6,14 +6,12 @@ import { useDialogStore } from './useDialogStore';
 interface InboundStore {
     inbounds: Inbound[];
     loading: boolean;
-    // 异步操作
     fetchInbounds: () => Promise<void>;
     addInbound: (node: any) => Promise<void>;
     updateInbound: (node: any) => Promise<void>;
     deleteInbound: (id: string) => Promise<void>;
     toggleEnable: (id: string) => Promise<void>;
     resetTraffic: (id: string) => Promise<void>;
-    // 同步设置
     setInbounds: (data: Inbound[]) => void;
 }
 

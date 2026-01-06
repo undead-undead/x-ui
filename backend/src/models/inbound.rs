@@ -1,6 +1,3 @@
-// src/models/inbound.rs
-// 入站节点数据模型
-
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -14,17 +11,16 @@ pub struct Inbound {
     pub port: i32,
     pub enable: bool,
 
-    // 新增字段
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tag: Option<String>, // 入站标签(用于路由)
+    pub tag: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub listen: Option<String>, // 监听地址
+    pub listen: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub allocate: Option<String>, // 端口分配策略(JSON 字符串)
+    pub allocate: Option<String>,
 
-    pub settings: Option<String>,        // JSON 字符串
-    pub stream_settings: Option<String>, // JSON 字符串
-    pub sniffing: Option<String>,        // JSON 字符串
+    pub settings: Option<String>,
+    pub stream_settings: Option<String>,
+    pub sniffing: Option<String>,
     pub up: i64,
     pub down: i64,
     pub total: i64,
@@ -44,7 +40,6 @@ pub struct CreateInboundRequest {
     pub port: i32,
     pub enable: Option<bool>,
 
-    // 新增字段
     pub tag: Option<String>,
     pub listen: Option<String>,
     pub allocate: Option<serde_json::Value>,
@@ -65,7 +60,6 @@ pub struct UpdateInboundRequest {
     pub port: Option<i32>,
     pub enable: Option<bool>,
 
-    // 新增字段
     pub tag: Option<String>,
     pub listen: Option<String>,
     pub allocate: Option<serde_json::Value>,
@@ -82,14 +76,6 @@ pub struct UpdateInboundRequest {
 pub struct DeleteInboundRequest {
     pub id: String,
 }
-
-/*
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ToggleInboundRequest {
-    pub id: String,
-}
-*/
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]

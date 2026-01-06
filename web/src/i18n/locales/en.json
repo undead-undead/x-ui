@@ -61,6 +61,9 @@
         "score": "Score",
         "total_count": "Total Inbounds",
         "total_traffic": "Total Traffic",
+        "up_total": "Up Total",
+        "down_total": "Down Total",
+        "reset": "Reset",
         "no_nodes": "No inbounds running",
         "table": {
             "remark": "Remark",
@@ -252,6 +255,7 @@
         "network_error": "Network Error",
         "save": "Save",
         "add": "Add",
-        "default": "Default"
+        "default": "Default",
+        "others": "Others"
     }
 }

@@ -41,7 +41,7 @@ export const useGlobalStore = create<GlobalState>((set, get) => ({
         mem: { current: '0 B', total: '0 B', percent: 0 },
         swap: { current: '0 B', total: '0 B', percent: 0 },
         disk: { current: '0 B', total: '0 B', percent: 0 },
-        uptime: '0 天',
+        uptime: '0 days',
         load: '0 | 0 | 0',
         xuiVersion: 'v2.0.0',
         xrayVersion: 'unknown',
@@ -61,7 +61,6 @@ export const useGlobalStore = create<GlobalState>((set, get) => ({
             if (res.success) {
                 const { obj } = res;
 
-                // 将后端原始字节转换为前端显示格式
                 set({
                     sysStatus: {
                         ...get().sysStatus,
@@ -81,7 +80,7 @@ export const useGlobalStore = create<GlobalState>((set, get) => ({
                             total: formatTraffic(obj.disk.total),
                             percent: parseFloat(((obj.disk.current / obj.disk.total) * 100).toFixed(2))
                         },
-                        uptime: `${Math.floor(obj.uptime / 86400)} 天`,
+                        uptime: `${Math.floor(obj.uptime / 86400)} days`,
                         load: obj.load.join(' | '),
                         xrayVersion: obj.xray.version,
                         xrayStatus: obj.xray.state,

@@ -1,11 +1,9 @@
 use std::process::Command;
 use tracing::info;
 
-/// 自动化防火墙放行工具
 pub fn open_port(port: u16) {
     info!("Attempting to open firewall port: {}", port);
 
-    // 1. 尝试 UFW (Ubuntu/Debian)
     if is_command_available("ufw") {
         let output = Command::new("ufw")
             .args(["allow", &format!("{}/tcp", port)])
@@ -20,7 +18,6 @@ pub fn open_port(port: u16) {
             .output();
     }
 
-    // 2. 尝试 firewalld (CentOS/RHEL)
     if is_command_available("firewall-cmd") {
         let success = Command::new("firewall-cmd")
             .args(["--permanent", &format!("--add-port={}/tcp", port)])
@@ -37,7 +34,6 @@ pub fn open_port(port: u16) {
         }
     }
 
-    // 3. 兜底尝试 iptables
     if is_command_available("iptables") {
         let _ = Command::new("iptables")
             .args([

@@ -12,7 +12,6 @@ export const AddInboundModal = () => {
     const { isOpen, closeModal, editingNode } = useModalStore();
     const { addInbound, updateInbound } = useInboundStore();
 
-    // 使用自定义 Hook 管理所有表单状态
     const form = useInboundForm(editingNode, isOpen);
 
     const generateRealityKeys = async () => {
@@ -22,7 +21,7 @@ export const AddInboundModal = () => {
             form.setRealityPrivateKey(keys.private_key);
             form.setRealityPublicKey(keys.public_key);
         } catch (error) {
-            useDialogStore.getState().showAlert('生成密钥失败，请重试', '错误');
+            useDialogStore.getState().showAlert('Failed to generate keys, please try again', 'Error');
         }
     };
 
@@ -41,7 +40,6 @@ export const AddInboundModal = () => {
     };
 
     const handleConfirm = async () => {
-        // 验证必填项
         if (!form.remark.trim()) {
             useDialogStore.getState().showAlert(t('inbound.modal.remark_empty'), t('common.error') || 'Error');
             return;
@@ -51,7 +49,6 @@ export const AddInboundModal = () => {
             return;
         }
 
-        // 构建协议设置
         let settings: any = {};
 
         if (form.protocol === 'vless' || form.protocol === 'vmess') {
@@ -91,13 +88,11 @@ export const AddInboundModal = () => {
             };
         }
 
-        // 构建传输层配置
         let streamSettings: any = {
             network: form.network,
             security: form.security,
         };
 
-        // 添加传输协议特定配置
         if (form.network === 'ws') {
             streamSettings.wsSettings = {
                 path: form.wsPath,
@@ -121,7 +116,6 @@ export const AddInboundModal = () => {
             };
         }
 
-        // 添加安全层配置
         if (form.security === 'reality') {
             if (!form.realityPrivateKey) {
                 useDialogStore.getState().showAlert(t('inbound.modal.reality_private_key_empty'), t('common.error') || 'Error');
@@ -142,7 +136,6 @@ export const AddInboundModal = () => {
             };
         }
 
-        // Socket 选项
         if (form.tcpFastOpen || form.tcpNoDelay || form.acceptProxyProtocol) {
             streamSettings.sockopt = {
                 ...(form.tcpFastOpen && { tcpFastOpen: true }),
@@ -178,7 +171,6 @@ export const AddInboundModal = () => {
             }
             closeModal();
         } catch (error: any) {
-            // Error already handled by store
         }
     };
 
@@ -199,9 +191,7 @@ export const AddInboundModal = () => {
                     </button>
                 </div>
 
-                {/* 滚动区域 */}
                 <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 no-scrollbar text-black">
-                    {/* 基础配置 */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.base_config')}</h3>
 
@@ -302,7 +292,6 @@ export const AddInboundModal = () => {
                     </div>
 
 
-                    {/* UUID 和流控 */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.protocol_config')}</h3>
 
@@ -337,7 +326,6 @@ export const AddInboundModal = () => {
                         </div>
                     </div>
 
-                    {/* 传输层配置 */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.stream_config')}</h3>
 
@@ -394,7 +382,6 @@ export const AddInboundModal = () => {
                         )}
                     </div>
 
-                    {/* 安全层配置 */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.security_config')}</h3>
 
@@ -511,7 +498,6 @@ export const AddInboundModal = () => {
 
 
 
-                    {/* Socket 选项 */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.socket_config')}</h3>
 

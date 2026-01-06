@@ -1,6 +1,3 @@
-// src/utils/response.rs
-// 统一响应格式
-
 use axum::{response::IntoResponse, Json};
 use serde::Serialize;
 
@@ -46,7 +43,6 @@ impl<T: Serialize> IntoResponse for ApiResponse<T> {
     }
 }
 
-// 便捷宏
 #[macro_export]
 macro_rules! ok {
     ($data:expr) => {

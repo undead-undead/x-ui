@@ -1,22 +1,21 @@
-// Xray 完整类型定义
 
 export interface Client {
-    id?: string;                    // VLESS/VMess UUID
-    flow?: string;                  // VLESS 流控
-    level?: number;                 // 用户等级
-    email?: string;                 // 用户标识
-    password?: string;              // Trojan/Shadowsocks 密码
-    alterId?: number;               // VMess 额外 ID
-    method?: string;                // Shadowsocks 加密方法
+    id?: string;
+    flow?: string;
+    level?: number;
+    email?: string;
+    password?: string;
+    alterId?: number;
+    method?: string;
 }
 
 export interface InboundSettings {
     clients?: Client[];
-    decryption?: string;            // VLESS 解密
-    encryption?: string;            // 加密
-    method?: string;                // Shadowsocks 加密方法
-    password?: string;              // Shadowsocks 密码
-    network?: string;               // Shadowsocks 网络类型
+    decryption?: string;
+    encryption?: string;
+    method?: string;
+    password?: string;
+    network?: string;
     [key: string]: any;
 }
 
@@ -76,7 +75,6 @@ export interface StreamSettings {
     security?: string;
     acceptProxyProtocol?: boolean;
 
-    // 传输协议配置
     wsSettings?: WsSettings;
     grpcSettings?: GrpcSettings;
     httpSettings?: HttpSettings;
@@ -85,11 +83,9 @@ export interface StreamSettings {
     quicSettings?: any;
     xhttpSettings?: any;
 
-    // 安全层配置
     tlsSettings?: TlsSettings;
     realitySettings?: RealitySettings;
 
-    // Socket 选项
     sockopt?: Sockopt;
 
     [key: string]: any;
@@ -109,23 +105,19 @@ export interface Inbound {
     port: number;
     protocol: string;
 
-    // 新增字段
     tag?: string;
     listen?: string;
     allocate?: any;
 
-    // 配置
     settings?: InboundSettings;
     streamSettings?: StreamSettings;
     sniffing?: SniffingSettings;
 
-    // 流量统计
     up: number;
     down: number;
     total: number;
     expiry: number;
 
-    // 时间戳
     createdAt?: string;
     updatedAt?: string;
 }

@@ -17,7 +17,6 @@ interface InboundTableProps {
     isEmbedded?: boolean;
 }
 
-// 性能优化：将表格行抽取为独立组件并使用 memo
 interface InboundRowProps {
     item: Inbound;
     onToggle: (id: string) => void;
@@ -115,7 +114,6 @@ export const InboundTable: React.FC<InboundTableProps> = memo(({ inbounds, isEmb
     const { toggleEnable, deleteInbound, resetTraffic } = useInboundStore();
     const { openModal } = useModalStore();
 
-    // 使用 useCallback 缓存回调函数，避免每次渲染创建新函数
     const handleToggle = useCallback((id: string) => {
         toggleEnable(id);
     }, [toggleEnable]);

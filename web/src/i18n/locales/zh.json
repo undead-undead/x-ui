@@ -61,6 +61,9 @@
         "score": "评分",
         "total_count": "节点总数",
         "total_traffic": "总流量",
+        "up_total": "总上传",
+        "down_total": "总下载",
+        "reset": "重置",
         "no_nodes": "暂无运行中的节点",
         "table": {
             "remark": "备注",
@@ -252,6 +255,7 @@
         "network_error": "网络错误",
         "save": "保存",
         "add": "添加",
-        "default": "默认"
+        "default": "默认",
+        "others": "其他"
     }
 }

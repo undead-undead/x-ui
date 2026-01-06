@@ -9,18 +9,18 @@ import type {
 import { downloadFile, generateTimestampedFilename } from '../utils/fileUtils';
 
 /**
- * 系统 API 接口
+ * System API Interface
  */
 export const sysApi = {
     /**
-     * 更新面板配置 (.env)
+     * Update panel configuration (.env)
      */
     updateConfig: async (webRoot: string, port: number): Promise<ApiResponse> => {
         return (await apiClient.post<ApiResponse>(API_PATHS.SERVER_UPDATE_CONFIG, { webRoot, port })).data;
     },
 
     /**
-     * 获取系统实时状态
+     * Get real-time system status
      */
     getSystemStatus: async (): Promise<ApiSysStatus> => {
         const response = await apiClient.post<ApiSysStatus>(API_PATHS.SERVER_SYS_STATS);
@@ -28,7 +28,7 @@ export const sysApi = {
     },
 
     /**
-     * 重启 Xray 服务
+     * Restart Xray service
      */
     restartXray: async (): Promise<ApiResponse> => {
         const response = await apiClient.post<ApiResponse>(API_PATHS.SERVER_RESTART_XRAY);
@@ -40,7 +40,7 @@ export const sysApi = {
     },
 
     /**
-     * 启动 Xray 服务
+     * Start Xray service
      */
     startXray: async (): Promise<ApiResponse> => {
         const response = await apiClient.post<ApiResponse>(API_PATHS.SERVER_START_XRAY);
@@ -48,7 +48,7 @@ export const sysApi = {
     },
 
     /**
-     * 停止 Xray 服务
+     * Stop Xray service
      */
     stopXray: async (): Promise<ApiResponse> => {
         const response = await apiClient.post<ApiResponse>(API_PATHS.SERVER_STOP_XRAY);
@@ -56,8 +56,8 @@ export const sysApi = {
     },
 
     /**
-     * 切换 Xray 版本
-     * @param version - 目标版本号
+     * Switch Xray version
+     * @param version - Target version number
      */
     switchXrayVersion: async (version: string): Promise<ApiResponse> => {
         const payload: UpdateXrayVersionRequest = { version };
@@ -66,7 +66,7 @@ export const sysApi = {
     },
 
     /**
-     * 获取 Xray 所有发布版本
+     * Get all Xray releases
      */
     getXrayReleases: async (): Promise<ApiResponse<string[]>> => {
         const response = await apiClient.get<ApiResponse<string[]>>(API_PATHS.SERVER_XRAY_RELEASES);
@@ -74,8 +74,8 @@ export const sysApi = {
     },
 
     /**
-     * 更新用户凭据（用户名和密码）
-     * @param data - 包含旧凭据和新凭据的对象
+     * Update user credentials (username and password)
+     * @param data - Object containing old and new credentials
      */
     updateCredentials: async (data: UpdateCredentialsRequest): Promise<ApiResponse> => {
         const response = await apiClient.post<ApiResponse>(API_PATHS.AUTH_UPDATE, data);
@@ -83,7 +83,7 @@ export const sysApi = {
     },
 
     /**
-     * 获取运行日志
+     * Get system logs
      */
     getLogs: async (): Promise<ApiLogsResponse> => {
         const response = await apiClient.post<ApiLogsResponse>(API_PATHS.SERVER_GET_LOGS);
@@ -91,8 +91,8 @@ export const sysApi = {
     },
 
     /**
-     * 导出数据库
-     * 自动下载数据库备份文件
+     * Export database
+     * Automatically downloads the database backup file
      */
     exportDb: async (): Promise<void> => {
         try {
@@ -110,8 +110,8 @@ export const sysApi = {
     },
 
     /**
-     * 导入数据库
-     * @param file - 数据库文件
+     * Import database
+     * @param file - Database file
      */
     importDb: async (file: File): Promise<ApiResponse> => {
         const formData = new FormData();

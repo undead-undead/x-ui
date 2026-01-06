@@ -2,15 +2,12 @@ import { useState, useMemo, useCallback } from 'react';
 import { useSettingStore } from '../store/useSettingStore';
 import { Shield, User, Database, Eye, EyeOff } from 'lucide-react';
 import { useBackupModalStore } from '../store/useBackupModalStore';
-
 import { useTranslation } from 'react-i18next';
 
 export const SettingsPage = () => {
     const { t } = useTranslation();
-
     const [activeTab, setActiveTab] = useState('panel');
 
-    // 性能优化：使用细粒度选择器
     const panel = useSettingStore((state) => state.panel);
     const auth = useSettingStore((state) => state.auth);
     const updatePanel = useSettingStore((state) => state.updatePanel);
@@ -30,32 +27,23 @@ export const SettingsPage = () => {
         if (!alphanumericRegex.test(value)) {
             setErrors(prev => ({ ...prev, [field]: t('settings.errors.alphanumeric') }));
         } else {
-
             setErrors(prev => ({ ...prev, [field]: undefined }));
         }
     };
 
-    // 性能优化：使用 useMemo 缓存 tabs 数组
     const tabs = useMemo(() => [
         { id: 'panel', label: t('settings.tabs.panel'), icon: Shield },
         { id: 'user', label: t('settings.tabs.user'), icon: User },
         { id: 'backup', label: t('settings.tabs.backup'), icon: Database },
-
     ], [t]);
 
-
-    // 性能优化：使用 useCallback 缓存回调函数
     const handleSave = useCallback(() => {
         if (activeTab === 'panel') {
             savePanelConfig();
         } else if (activeTab === 'user') {
-            // 先验证并保存用户信息，然后调用 savePanelConfig 重启
             confirmUpdateAuth();
-            // 注意：confirmUpdateAuth 内部会显示确认对话框
-            // 用户确认后才会真正保存，所以这里不直接调用 savePanelConfig
         }
     }, [activeTab, savePanelConfig, confirmUpdateAuth]);
-
 
     return (
         <div className="flex-1 min-h-screen bg-gray-50 p-8 lg:p-14 overflow-y-auto relative font-sans">
@@ -72,9 +60,7 @@ export const SettingsPage = () => {
                     </div>
                 </header>
 
-                {/* Unified Card Container */}
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-lg animate-in fade-in slide-in-from-bottom-6 duration-1000 overflow-hidden">
-                    {/* Tab Navigation */}
                     <div className="flex p-1 bg-gray-100/80 border-b border-gray-200">
                         {tabs.map((tab) => (
                             <button
@@ -90,7 +76,6 @@ export const SettingsPage = () => {
                         ))}
                     </div>
 
-                    {/* Settings Form Content */}
                     <div className="p-10 md:p-14">
                         {activeTab === 'panel' && (
                             <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
@@ -103,7 +88,6 @@ export const SettingsPage = () => {
                                     <div className="space-y-4">
                                         <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.panel_config.port')}</label>
                                         <input
-
                                             type="number"
                                             value={panel.port}
                                             onChange={(e) => updatePanel({ port: Number(e.target.value) })}
@@ -113,17 +97,14 @@ export const SettingsPage = () => {
                                     <div className="space-y-4">
                                         <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.panel_config.web_root')}</label>
                                         <input
-
                                             type="text"
                                             value={panel.webRoot}
                                             onChange={(e) => {
                                                 let value = e.target.value;
-                                                // 只允许英文字母、数字、斜杠、连字符、下划线和点
                                                 value = value.replace(/[^a-zA-Z0-9\/_\-\.]/g, '');
                                                 updatePanel({ webRoot: value });
                                             }}
                                             onBlur={(e) => {
-                                                // 失去焦点时，如果为空则设置为默认值
                                                 if (!e.target.value.trim()) {
                                                     updatePanel({ webRoot: '/' });
                                                 }
@@ -134,7 +115,6 @@ export const SettingsPage = () => {
                                         />
                                         <p className="text-xs text-gray-400 ml-1">{t('settings.panel_config.web_root_desc')}</p>
                                     </div>
-
                                 </div>
                             </div>
                         )}
@@ -146,9 +126,7 @@ export const SettingsPage = () => {
                                     <p className="text-xs font-medium text-gray-500 mt-1">{t('settings.user_config.desc')}</p>
                                 </div>
 
-
                                 <div className="space-y-6 max-w-md">
-                                    {/* 原用户名 */}
                                     <div className="space-y-4">
                                         <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.user_config.old_username')}</label>
                                         <input
@@ -163,8 +141,6 @@ export const SettingsPage = () => {
                                         />
                                     </div>
 
-
-                                    {/* 原密码 */}
                                     <div className="space-y-4">
                                         <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.user_config.old_password')}</label>
                                         <input
@@ -176,8 +152,6 @@ export const SettingsPage = () => {
                                         />
                                     </div>
 
-
-                                    {/* 新用户名 */}
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end ml-1">
                                             <label className="text-[13px] font-bold text-gray-500 tracking-tight">{t('settings.user_config.new_username')}</label>
@@ -201,8 +175,6 @@ export const SettingsPage = () => {
                                         />
                                     </div>
 
-
-                                    {/* 新密码 */}
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end ml-1">
                                             <label className="text-[13px] font-bold text-gray-500 tracking-tight">{t('settings.user_config.new_password')}</label>
@@ -254,7 +226,6 @@ export const SettingsPage = () => {
                                 </button>
                             </div>
                         )}
-
                     </div>
                 </div>
             </div>

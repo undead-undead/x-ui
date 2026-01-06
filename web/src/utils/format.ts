@@ -7,12 +7,10 @@ const formatBytes = (bytes: number) => {
     return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + (sizes[i] || 'B');
 };
 
-// 用于显示总流量 (如: 1.25 GB)
 export const formatTraffic = (bytes: number) => {
     return formatBytes(bytes);
 };
 
-// 用于显示实时速度 (如: 500 KB/s)
 export const formatSpeed = (bytesPerSecond: number) => {
     return formatBytes(bytesPerSecond) + '/s';
 };

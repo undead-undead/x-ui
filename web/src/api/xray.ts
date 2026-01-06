@@ -6,7 +6,7 @@ export interface RealityKeysResponse {
 }
 
 /**
- * 生成 Reality 密钥对（调用后端，后端调用 xray x25519）
+ * Generate Reality key pair (calls backend which calls xray x25519)
  */
 export async function generateRealityKeys(): Promise<RealityKeysResponse> {
     const response = await apiClient.get<RealityKeysResponse>('/xray/generate-reality-keys');

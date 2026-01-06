@@ -20,12 +20,11 @@ pub async fn check_domain(domain: &str) -> anyhow::Result<RealityCheckResponse> 
     let url = format!("https://{}", host);
     let start = std::time::Instant::now();
 
-    // 1. 核心测试：TLS 1.3 (增加耐心，模拟浏览器)
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         .min_tls_version(reqwest::tls::Version::TLS_1_3)
         .max_tls_version(reqwest::tls::Version::TLS_1_3)
-        .timeout(Duration::from_secs(6)) // 提升到 6s
+        .timeout(Duration::from_secs(6))
         .danger_accept_invalid_certs(true)
         .build()?;
 
@@ -38,10 +37,9 @@ pub async fn check_domain(domain: &str) -> anyhow::Result<RealityCheckResponse> 
             has_tls13: true,
             key_exchange: "X25519".to_string(),
             latency,
-            message: "目标支持 TLS 1.3 及 X25519 密钥交换".to_string(),
+            message: "Target supports TLS 1.3 and X25519 key exchange".to_string(),
         }),
         Err(e) => {
-            // 2. 诊断：如果是超时或其它错误，进行最终确认
             let client_diag = reqwest::Client::builder()
                 .user_agent("Mozilla/5.0")
                 .timeout(Duration::from_secs(5))
@@ -56,7 +54,8 @@ pub async fn check_domain(domain: &str) -> anyhow::Result<RealityCheckResponse> 
                     has_tls13: false,
                     key_exchange: "Unsupported".to_string(),
                     latency,
-                    message: "目标站不支持 TLS 1.3 (仅支持 1.2 或更低版本)".to_string(),
+                    message: "Target station does not support TLS 1.3 (only supports 1.2 or lower)"
+                        .to_string(),
                 })
             } else {
                 Ok(RealityCheckResponse {
@@ -65,11 +64,11 @@ pub async fn check_domain(domain: &str) -> anyhow::Result<RealityCheckResponse> 
                     key_exchange: "None".to_string(),
                     latency,
                     message: format!(
-                        "VPS 连接目标站失败: {} (请检查线路质量)",
+                        "VPS failed to connect to target station: {} (please check network quality)",
                         if e.is_timeout() {
-                            "请求超时"
+                            "Request timeout"
                         } else {
-                            "连接被重置"
+                            "Connection reset"
                         }
                     ),
                 })

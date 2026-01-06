@@ -1,6 +1,3 @@
-// src/middleware/auth.rs
-// JWT 认证中间件
-
 use axum::{
     extract::{Request, State},
     http::StatusCode,
@@ -11,14 +8,11 @@ use sqlx::SqlitePool;
 
 use crate::utils::{jwt, token_validator};
 
-/// 提取 JWT Token 并验证
-/// 安全改进: 验证 Token 是否在密码修改后失效
 pub async fn auth_middleware(
     State(pool): State<SqlitePool>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    // 从 Authorization header 提取 token
     let token = req
         .headers()
         .get("Authorization")
@@ -26,10 +20,8 @@ pub async fn auth_middleware(
         .and_then(|h| h.strip_prefix("Bearer "))
         .ok_or(StatusCode::UNAUTHORIZED)?;
 
-    // 验证 token 签名和过期时间
     let claims = jwt::verify_token(token).map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-    // 验证 Token 是否在密码修改后失效
     token_validator::validate_token_freshness(&pool, &claims)
         .await
         .map_err(|e| {
@@ -37,13 +29,11 @@ pub async fn auth_middleware(
             StatusCode::UNAUTHORIZED
         })?;
 
-    // 将用户信息存入请求扩展中，供后续 handler 使用
     req.extensions_mut().insert(claims);
 
     Ok(next.run(req).await)
 }
 
-// 可选的：用于handler中提取用户信息的Extractor
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
 use serde::Serialize;

@@ -6,7 +6,6 @@ import { LoginPage } from './views/LoginPage';
 import { Dialog } from './components/Dialog';
 import { Toaster } from 'react-hot-toast';
 
-// 性能优化：使用 lazy 懒加载弹窗组件，减少首屏加载时间
 const AddInboundModal = lazy(() => import('./components/AddInboundModal').then(module => ({ default: module.AddInboundModal })));
 const BackupModal = lazy(() => import('./components/BackupModal').then(module => ({ default: module.BackupModal })));
 const LogsModal = lazy(() => import('./components/LogsModal').then(m => ({ default: m.LogsModal })));
@@ -27,7 +26,6 @@ function App() {
             <Outlet />
           </main>
 
-          {/* 弹窗挂载 - 使用 Suspense 包裹懒加载组件 */}
           <Suspense fallback={null}>
             <AddInboundModal />
             <BackupModal />
@@ -37,7 +35,6 @@ function App() {
         </div>
       )}
 
-      {/* 全局对话框 - 始终保留，确保在注销切换状态时不会被卸载 */}
       <Dialog />
     </div>
   );

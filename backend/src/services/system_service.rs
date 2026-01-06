@@ -1,6 +1,3 @@
-// src/services/system_service.rs
-// 系统服务层：处理系统监控、日志获取、进程管理等
-
 use crate::errors::ApiResult;
 use chrono;
 use serde::{Deserialize, Serialize};
@@ -18,12 +15,10 @@ pub struct SystemMonitor {
 
 impl SystemMonitor {
     pub fn new() -> Self {
-        // 使用 new() 而不是 new_all()，避免初始化进程列表等大对象
         let mut sys = System::new();
         sys.refresh_cpu_all();
         sys.refresh_memory();
 
-        // 初始刷新
         let disks = Disks::new_with_refreshed_list();
         let networks = Networks::new_with_refreshed_list();
 
@@ -36,27 +31,20 @@ impl SystemMonitor {
     }
 
     pub fn get_system_stats(&mut self) -> ApiResult<SysStats> {
-        // 精准刷新：只刷新 CPU 负载和 内存状态，不再刷新所有进程
         self.sys.refresh_cpu_all();
         self.sys.refresh_memory();
-        // 0.33 版本的分散刷新语法
         let _ = self.disks.refresh(true);
         let _ = self.networks.refresh(true);
 
-        // CPU
         let cpu_load = self.sys.global_cpu_usage() as f64;
 
-        // Memory - use available_memory for more accurate stats
-        // available_memory excludes reclaimable cache/buffers
         let mem_total = self.sys.total_memory();
         let mem_available = self.sys.available_memory();
         let mem_current = mem_total.saturating_sub(mem_available);
 
-        // Swap
         let swap_current = self.sys.used_swap();
         let swap_total = self.sys.total_swap();
 
-        // Disk
         let mut disk_current = 0;
         let mut disk_total = 0;
         for disk in &self.disks {
@@ -64,14 +52,11 @@ impl SystemMonitor {
             disk_current += disk.total_space() - disk.available_space();
         }
 
-        // Uptime
         let uptime = System::uptime();
 
-        // Load average
         let load_avg = System::load_average();
         let load = vec![load_avg.one, load_avg.five, load_avg.fifteen];
 
-        // Xray Status
         let xray_state_str = if self.is_xray_running() {
             "running"
         } else {
@@ -85,10 +70,8 @@ impl SystemMonitor {
             version: xray_version,
         };
 
-        // TCP/UDP count
         let (tcp_count, udp_count) = get_connection_counts();
 
-        // Network Traffic & IO
         let mut net_sent = 0;
         let mut net_recv = 0;
         let mut net_up = 0;
@@ -131,14 +114,10 @@ impl SystemMonitor {
         })
     }
 
-    // Helper to check Xray status
     fn is_xray_running(&self) -> bool {
-        // In real Linux environment, check systemctl or process list
-        // logic below tries to find a process named "xray" or uses internal flag
         #[cfg(target_os = "linux")]
         {
-            // First try systemctl if available (simplified check by just assuming if we can't find process easily)
-            return self.mock_running; // using mock state for now to ensure UI works in dev
+            return self.mock_running;
         }
         #[cfg(not(target_os = "linux"))]
         return self.mock_running;
@@ -213,7 +192,6 @@ pub struct NetIo {
     pub down: u64,
 }
 
-/// 获取运行日志 (优化：只读取文件末尾，避免大文件撑爆内存)
 pub async fn get_logs() -> ApiResult<Vec<String>> {
     let cwd = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
     let log_path = cwd.join("logs").join("error.log");
@@ -221,7 +199,6 @@ pub async fn get_logs() -> ApiResult<Vec<String>> {
 
     let mut logs = Vec::new();
 
-    // 辅助函数：只读取文件最后的一部分
     async fn read_last_bytes(path: &std::path::Path, limit: u64) -> Vec<String> {
         use tokio::io::{AsyncReadExt, AsyncSeekExt};
         let mut file = match tokio::fs::File::open(path).await {
@@ -240,14 +217,12 @@ pub async fn get_logs() -> ApiResult<Vec<String>> {
         buffer.lines().map(|s| s.to_string()).collect()
     }
 
-    // 只读取最后 32KB 的日志
     let error_lines = read_last_bytes(&log_path, 32768).await;
     for line in error_lines {
         logs.push(format!("[ErrorLog] {}", line));
     }
 
     let access_lines = read_last_bytes(&access_log_path, 32768).await;
-    // 访问日志只保留最后 50 条
     let start = if access_lines.len() > 50 {
         access_lines.len() - 50
     } else {
@@ -261,7 +236,6 @@ pub async fn get_logs() -> ApiResult<Vec<String>> {
         return Ok(logs);
     }
 
-    // Fallback to journalctl
     let output = tokio::process::Command::new("journalctl")
         .args(["-u", "x-ui", "-n", "100", "--no-pager"])
         .output()
@@ -279,33 +253,31 @@ pub async fn get_logs() -> ApiResult<Vec<String>> {
 fn get_fallback_logs() -> ApiResult<Vec<String>> {
     Ok(vec![
         format!(
-            "[{}] 系统自检通过...",
+            "[{}] System self-check passed...",
             chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
         ),
         format!(
-            "[{}] 数据库连接池已就绪...",
+            "[{}] Database connection pool is ready...",
             chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
         ),
         format!(
-            "[{}] Xray 核心运行正常...",
+            "[{}] Xray core is running normally...",
             chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
         ),
         format!(
-            "[{}] 后台管理程序监听中...",
+            "[{}] Backend management process is listening...",
             chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
         ),
         format!(
-            "[{}] 暂未捕获到活跃的系统 Service 日志 (x-ui.service)...",
+            "[{}] No active system service logs captured (x-ui.service)...",
             chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
         ),
     ])
 }
 
-/// 停止 Xray 服务
 pub async fn stop_xray(monitor: SharedMonitor) -> ApiResult<()> {
     tracing::info!("Received request to stop Xray service...");
 
-    // Update mock state FIRST
     {
         let mut m = monitor.lock().unwrap();
         m.set_mock_running(false);
@@ -313,24 +285,20 @@ pub async fn stop_xray(monitor: SharedMonitor) -> ApiResult<()> {
 
     #[cfg(target_os = "linux")]
     {
-        // Try pkill first to match command line
         let _ = std::process::Command::new("pkill")
             .arg("-f")
             .arg("xray")
             .output();
 
-        // Also try killall just in case
         let _ = std::process::Command::new("killall").arg("xray").output();
     }
 
     Ok(())
 }
 
-/// 启动 Xray 服务
 pub async fn start_xray(monitor: SharedMonitor) -> ApiResult<()> {
     tracing::info!("Received request to start Xray service...");
 
-    // Update mock state
     {
         let mut m = monitor.lock().unwrap();
         m.set_mock_running(true);
@@ -356,12 +324,11 @@ pub async fn start_xray(monitor: SharedMonitor) -> ApiResult<()> {
             crate::errors::ApiError::SystemError(format!("Failed to create stderr log: {}", e))
         })?;
 
-        // Use std::process::Command to spawn detached
         let child = std::process::Command::new(&bin_path_str)
             .arg("-c")
             .arg(&config_path_str)
-            .env("GOMEMLIMIT", "150MiB") // 强制 Go 核心限制内存
-            .env("GOGC", "50") // 更激进的垃圾回收
+            .env("GOMEMLIMIT", "150MiB")
+            .env("GOGC", "50")
             .stdout(stdout_file)
             .stderr(stderr_file)
             .spawn();
@@ -385,14 +352,12 @@ pub async fn start_xray(monitor: SharedMonitor) -> ApiResult<()> {
     Ok(())
 }
 
-/// 重启 Xray 服务
 pub async fn restart_xray(monitor: SharedMonitor) -> ApiResult<()> {
     stop_xray(monitor.clone()).await?;
     tokio::time::sleep(std::time::Duration::from_millis(50)).await;
     start_xray(monitor).await
 }
 
-/// 重启面板服务 (systemctl restart x-ui)
 pub async fn restart_panel() -> ApiResult<()> {
     tracing::info!("Received request to restart X-UI Panel service...");
 
@@ -407,11 +372,9 @@ pub async fn restart_panel() -> ApiResult<()> {
     Ok(())
 }
 
-/// 更新 Xray 版本
 pub async fn update_xray(monitor: SharedMonitor, version: String) -> ApiResult<()> {
     tracing::info!("Start updating Xray to version: {}", version);
 
-    // 1. Detect Architecture
     let arch = std::env::consts::ARCH;
     let xray_arch = match arch {
         "x86_64" => "64",
@@ -424,22 +387,18 @@ pub async fn update_xray(monitor: SharedMonitor, version: String) -> ApiResult<(
         }
     };
 
-    // 2. Construct URL
-    // Ensure version starts with 'v', e.g., "v1.8.4"
     let tag_name = if version.starts_with('v') {
         version.clone()
     } else {
         format!("v{}", version)
     };
 
-    // https://github.com/XTLS/Xray-core/releases/download/v1.8.4/Xray-linux-64.zip
     let url = format!(
         "https://github.com/XTLS/Xray-core/releases/download/{}/Xray-linux-{}.zip",
         tag_name, xray_arch
     );
     tracing::info!("Downloading from: {}", url);
 
-    // 3. Download
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0")
         .build()
@@ -463,25 +422,21 @@ pub async fn update_xray(monitor: SharedMonitor, version: String) -> ApiResult<(
         .await
         .map_err(|e| crate::errors::ApiError::SystemError(format!("Failed to read body: {}", e)))?;
 
-    // 4. Extract (Wrap in a block to ensure non-Send ZipFile is dropped before final .await)
     {
         let reader = std::io::Cursor::new(content);
         let mut zip = zip::ZipArchive::new(reader).map_err(|e| {
             crate::errors::ApiError::SystemError(format!("Failed to open zip: {}", e))
         })?;
 
-        // Find 'xray' file
         let mut xray_file = zip.by_name("xray").map_err(|_| {
             crate::errors::ApiError::SystemError("xray binary not found in zip".to_string())
         })?;
 
-        // 5. Save to temp, then move
         let bin_path_str =
             std::env::var("XRAY_BIN_PATH").unwrap_or("/usr/local/bin/xray".to_string());
         let bin_path = std::path::Path::new(&bin_path_str);
         tracing::info!("Xray binary will be updated at: {}", bin_path.display());
 
-        // Create parent dir if not exists
         if let Some(parent) = bin_path.parent() {
             if !parent.exists() {
                 std::fs::create_dir_all(parent).map_err(|e| {
@@ -490,7 +445,6 @@ pub async fn update_xray(monitor: SharedMonitor, version: String) -> ApiResult<(
             }
         }
 
-        // Create temp file
         let tmp_path = bin_path.with_extension("tmp");
         let mut tmp_file = std::fs::File::create(&tmp_path).map_err(|e| {
             crate::errors::ApiError::SystemError(format!("Failed to create tmp file: {}", e))
@@ -500,10 +454,8 @@ pub async fn update_xray(monitor: SharedMonitor, version: String) -> ApiResult<(
             crate::errors::ApiError::SystemError(format!("Failed to write binary: {}", e))
         })?;
 
-        // 6. Replace and chmod
-        drop(tmp_file); // Flush and close
+        drop(tmp_file);
 
-        // Chmod +x (Unix only)
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
@@ -521,13 +473,11 @@ pub async fn update_xray(monitor: SharedMonitor, version: String) -> ApiResult<(
 
     tracing::info!("Xray binary updated successfully to {}", version);
 
-    // 7. Restart Service
     restart_xray(monitor).await?;
 
     Ok(())
 }
 
-/// 获取 Xray 发布版本列表
 pub async fn get_xray_releases() -> ApiResult<Vec<String>> {
     #[derive(Deserialize)]
     struct Release {
@@ -594,13 +544,9 @@ fn get_xray_version() -> Option<String> {
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    // stdout example: "Xray 1.8.4 (Xray, Penetrates Everything.) ..."
-    // We want "1.8.4" or "v1.8.4"
     if let Some(line) = stdout.lines().next() {
         let parts: Vec<&str> = line.split_whitespace().collect();
-        // parts[0] is "Xray", parts[1] is version
         if parts.len() >= 2 {
-            // Check if it already has 'v'
             let ver = parts[1];
             if ver.starts_with('v') {
                 return Some(ver.to_string());

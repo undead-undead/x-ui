@@ -1,5 +1,4 @@
 // src/errors/mod.rs
-// 统一错误处理
 
 use axum::{
     http::StatusCode,
@@ -25,10 +24,6 @@ pub enum ApiError {
     #[error("Invalid input: {0}")]
     BadRequest(String),
 
-    /*
-    #[error("Resource not found: {0}")]
-    NotFound(String),
-    */
     #[error("Internal server error: {0}")]
     InternalError(String),
 
@@ -54,9 +49,6 @@ impl IntoResponse for ApiError {
             }
             ApiError::Unauthorized(ref msg) => (StatusCode::UNAUTHORIZED, msg.clone()),
             ApiError::BadRequest(ref msg) => (StatusCode::BAD_REQUEST, msg.clone()),
-            /*
-            ApiError::NotFound(ref msg) => (StatusCode::NOT_FOUND, msg.clone()),
-            */
             ApiError::InternalError(ref msg) => {
                 tracing::error!("Internal error: {}", msg);
                 (StatusCode::INTERNAL_SERVER_ERROR, msg.clone())

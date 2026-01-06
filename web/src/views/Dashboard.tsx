@@ -6,7 +6,6 @@ import { useDialogStore } from '../store/useDialogStore';
 import { VersionSelectModal } from '../components/VersionSelectModal';
 import { DASHBOARD_POLLING_INTERVAL } from '../config/constants';
 
-// 性能优化：使用 memo 包裹纯展示组件
 const StatusCircle = memo<{ percent: number; title: string; value: string }>(({ percent, title, value }) => (
     <div className="bg-white border border-gray-100 rounded-4xl p-8 flex flex-col items-center justify-center shadow-sm animate-in fade-in duration-700">
         <div className="relative w-32 h-32 flex items-center justify-center mb-6">
@@ -36,7 +35,6 @@ const StatusBar = memo<{ children: React.ReactNode }>(({ children }) => (
 ));
 
 StatusBar.displayName = 'StatusBar';
-
 
 export const Dashboard = () => {
     const { t } = useTranslation();
@@ -109,8 +107,6 @@ export const Dashboard = () => {
                 onSelect={handleVersionSelect}
             />
             <div className="max-w-7xl mx-auto space-y-8">
-
-                {/* 1. Top Circular Gauges - No Icons */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatusCircle percent={Math.round(sysStatus.cpu)} title={t('dashboard.cpu')} value="" />
                     <StatusCircle percent={Math.round(sysStatus.mem.percent)} title={t('dashboard.memory')} value={`${sysStatus.mem.current} / ${sysStatus.mem.total}`} />
@@ -118,10 +114,7 @@ export const Dashboard = () => {
                     <StatusCircle percent={Math.round(sysStatus.disk.percent)} title={t('dashboard.disk')} value={`${sysStatus.disk.current} / ${sysStatus.disk.total}`} />
                 </div >
 
-                {/* 2. Main Info Bars Grid - No Icons */}
                 < div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4" >
-
-                    {/* Left Column */}
                     < div className="space-y-4" >
                         <StatusBar>
                             <div className="flex items-center gap-4 text-sm font-bold">
@@ -186,7 +179,6 @@ export const Dashboard = () => {
                         </StatusBar>
                     </div >
 
-                    {/* Right Column */}
                     < div className="space-y-4" >
                         <StatusBar>
                             <div className="flex items-center gap-2 text-sm font-bold">
@@ -197,7 +189,7 @@ export const Dashboard = () => {
 
                         <StatusBar>
                             <div className="flex items-center gap-4 text-sm font-bold">
-                                <span className="text-gray-900">其他:</span>
+                                <span className="text-gray-900">{t('common.others')}:</span>
                                 <div className="flex gap-3">
                                     <button
                                         onClick={() => useLogsStore.getState().open()}
@@ -218,7 +210,6 @@ export const Dashboard = () => {
                                 </span>
                             </div>
                         </StatusBar>
-
                     </div >
                 </div >
             </div >

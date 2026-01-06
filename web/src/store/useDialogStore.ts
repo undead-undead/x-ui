@@ -22,18 +22,18 @@ export const useDialogStore = create<DialogStore>((set, get) => ({
     type: 'alert',
     title: '',
     message: '',
-    confirmText: '确定',
-    cancelText: '取消',
+    confirmText: 'OK',
+    cancelText: 'Cancel',
     onConfirm: null,
     onCancel: null,
 
-    showAlert: (message: string, title: string = '提示', onConfirm?: () => void) => {
+    showAlert: (message: string, title: string = 'Info', onConfirm?: () => void) => {
         set({
             isOpen: true,
             type: 'alert',
             title,
             message,
-            confirmText: '确定',
+            confirmText: 'OK',
             onConfirm: () => {
                 get().close();
                 if (onConfirm) onConfirm();
@@ -42,19 +42,17 @@ export const useDialogStore = create<DialogStore>((set, get) => ({
         });
     },
 
-    showConfirm: (message: string, onConfirm: () => void, title: string = '确认操作') => {
+    showConfirm: (message: string, onConfirm: () => void, title: string = 'Confirm') => {
         return new Promise((resolve) => {
             set({
                 isOpen: true,
                 type: 'confirm',
                 title,
                 message,
-                confirmText: '确定',
-                cancelText: '取消',
+                confirmText: 'OK',
+                cancelText: 'Cancel',
                 onConfirm: () => {
-                    // 先关闭对话框
                     get().close();
-                    // 使用 setTimeout 确保对话框关闭动画开始后再执行回调
                     setTimeout(() => {
                         onConfirm();
                         resolve(true);

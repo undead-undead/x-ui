@@ -8,49 +8,44 @@ mod routes;
 mod services;
 mod utils;
 
-// #[global_allocator]
-// static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
-
 use axum::http::Method;
 use axum::response::IntoResponse;
 use axum::Router;
 use tower_http::cors::CorsLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-/// 自动初始化环境：如果没有 .env 文件，自动创建一个并生成随机密钥
 fn auto_init_env() {
     let env_path = std::path::Path::new(".env");
     if !env_path.exists() {
         let secret = uuid::Uuid::new_v4().to_string();
         let content = format!(
-            r#"# 自动生成的配置文件 - 首次启动创建
+            r#"# Auto-generated configuration - created on first start
 DATABASE_URL=sqlite://data/x-ui.db
 
-# JWT 认证密钥 - 已自动生成强加密随机字符串
+# JWT secret - auto-generated strong random string
 JWT_SECRET={}
 JWT_EXPIRATION_HOURS=24
 
-# 面板监听配置
+# Panel listening configuration
 SERVER_HOST=0.0.0.0
 SERVER_PORT=8080
 
-# Xray 核心路径
+# Xray binary path
 XRAY_BIN_PATH=./bin/xray
 XRAY_CONFIG_PATH=./data/xray.json
 
-# 日志输出详细程度
+# Log level
 RUST_LOG=debug,sqlx=warn
 "#,
             secret
         );
         if let Err(e) = std::fs::write(env_path, content) {
-            eprintln!("无法自动创建 .env 文件: {}", e);
+            eprintln!("Failed to auto-create .env file: {}", e);
         } else {
-            println!("首次运行: 已自动生成 .env 配置文件和随机加密密钥");
+            println!("First run: Auto-generated .env configuration and random encryption key");
         }
     }
 
-    // 确保必要目录存在
     let _ = std::fs::create_dir_all("data");
     let _ = std::fs::create_dir_all("logs");
     let _ = std::fs::create_dir_all("bin");
@@ -58,13 +53,10 @@ RUST_LOG=debug,sqlx=warn
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
 async fn main() -> anyhow::Result<()> {
-    // 0. 自动初始化环境 (实现傻瓜式一键运行)
     auto_init_env();
 
-    // 1. 优先处理命令行参数
     let args: Vec<String> = std::env::args().collect();
     if args.len() > 1 {
-        // 简单参数解析
         if args.contains(&"--help".to_string()) || args.contains(&"-h".to_string()) {
             println!("X-UI Backend CLI");
             println!("Usage:");
@@ -80,26 +72,23 @@ async fn main() -> anyhow::Result<()> {
             dotenvy::dotenv().ok();
             let pool = db::init_pool().await?;
             services::auth_service::reset_admin(&pool).await?;
-            println!("管理员账号已重置为: admin / admin");
+            println!("Admin credentials reset to: admin / admin");
             return Ok(());
         }
 
-        // 处理自定义账号设置
         if let Some(u_idx) = args.iter().position(|r| r == "--user" || r == "-u") {
             if let Some(username) = args.get(u_idx + 1) {
                 if let Some(p_idx) = args.iter().position(|r| r == "--password" || r == "-p") {
                     if let Some(password) = args.get(p_idx + 1) {
                         dotenvy::dotenv().ok();
                         let pool = db::init_pool().await?;
-                        // 调用 update_credentials 的核心逻辑（复用或直接更新）
-                        // 这里简单起见直接哈希并更新，因为我们要的是强制重置
                         let hashed = utils::password::hash_password(password)?;
                         sqlx::query("UPDATE users SET username = ?, password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1")
                             .bind(username)
                             .bind(&hashed)
                             .execute(&pool)
                             .await?;
-                        println!("管理员账号已更新为: {} / ***", username);
+                        println!("Admin username updated to: {} / ***", username);
                         return Ok(());
                     }
                 }
@@ -107,10 +96,8 @@ async fn main() -> anyhow::Result<()> {
         }
     }
 
-    // 2. 加载环境变量并继续正常启动
     dotenvy::dotenv().ok();
 
-    // 初始化日志
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -119,19 +106,15 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // 初始化数据库
     let pool = db::init_pool().await?;
     db::run_migrations(&pool).await?;
 
-    // 初始化默认管理员密码
     services::auth_service::init_default_admin(&pool).await?;
 
-    // 初始化系统监控
     let monitor = std::sync::Arc::new(std::sync::Mutex::new(
         services::system_service::SystemMonitor::new(),
     ));
 
-    // 默认环境变量优化
     if std::env::var("XRAY_BIN_PATH").is_err() {
         std::env::set_var("XRAY_BIN_PATH", "./bin/xray");
     }
@@ -139,7 +122,6 @@ async fn main() -> anyhow::Result<()> {
         std::env::set_var("XRAY_CONFIG_PATH", "./data/xray.json");
     }
 
-    // 规范化 WEB_ROOT：确保以 / 开始且以 / 结束
     let mut web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
     if !web_root.starts_with('/') {
         web_root = format!("/{}", web_root);
@@ -149,20 +131,17 @@ async fn main() -> anyhow::Result<()> {
     }
     std::env::set_var("WEB_ROOT", web_root);
 
-    // 启动时自动应用一次配置
     if let Err(e) = services::xray_service::apply_config(&pool, monitor.clone()).await {
-        tracing::error!("启动时应用配置失败: {}", e);
+        tracing::error!("Failed to apply config on startup: {}", e);
     } else {
-        tracing::info!("初始 Xray 核心已成功启动或更新");
+        tracing::info!("Initial Xray core successfully started or updated");
     }
 
-    // 启动流量统计任务
     services::traffic_service::start_traffic_stats_task(pool.clone(), monitor.clone());
 
-    // CORS 配置
     #[cfg(debug_assertions)]
     let cors_layer = match std::env::var("SERVER_HOST") {
-        Ok(_) => CorsLayer::new().allow_origin(tower_http::cors::Any), // 开发环境允许所有
+        Ok(_) => CorsLayer::new().allow_origin(tower_http::cors::Any),
         Err(_) => CorsLayer::new()
             .allow_origin(
                 "http://localhost:5173"
@@ -185,7 +164,7 @@ async fn main() -> anyhow::Result<()> {
 
     #[cfg(not(debug_assertions))]
     let cors_layer = CorsLayer::new()
-        .allow_origin(tower_http::cors::Any) // 生产环境允许任意来源
+        .allow_origin(tower_http::cors::Any)
         .allow_methods([
             Method::GET,
             Method::POST,
@@ -197,18 +176,14 @@ async fn main() -> anyhow::Result<()> {
             axum::http::header::CONTENT_TYPE,
             axum::http::header::AUTHORIZATION,
         ])
-        .allow_credentials(false); // 显式禁用 credentials 以兼容 wildcard origin
+        .allow_credentials(false);
 
-    // 构建 API 路由
     let api_router = routes::create_router(pool, monitor)
         .layer(axum::middleware::from_fn(
             middleware::security::security_headers_middleware,
         ))
         .layer(cors_layer);
 
-    // 静态文件服务
-    // 静态文件服务
-    // 优先读取环境变量，其次尝试搜索
     let env_dist_path = std::env::var("WEB_DIST_PATH").unwrap_or_default();
 
     let mut candidates = vec![
@@ -220,12 +195,11 @@ async fn main() -> anyhow::Result<()> {
         "/usr/local/x-ui/dist",
     ];
 
-    // 如果环境变量设置了路径，将其作为首选候选（插到最前面）
     if !env_dist_path.is_empty() {
         candidates.insert(0, env_dist_path.as_str());
     }
 
-    let mut dist_path = "./bin/dist".to_string(); // Default fallback
+    let mut dist_path = "./bin/dist".to_string();
     for path in candidates {
         if !path.is_empty() && std::path::Path::new(path).exists() {
             dist_path = path.to_string();
@@ -236,13 +210,11 @@ async fn main() -> anyhow::Result<()> {
     if let Ok(cwd) = std::env::current_dir() {
         tracing::info!("Current Working Directory: {:?}", cwd);
     }
-    // 动态处理 index.html 的注入
+
     let index_dist_path = dist_path.clone();
     let index_handler = move |req: axum::http::Request<axum::body::Body>| async move {
         let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
 
-        // 关键：如果请求的是资源文件(js/css/etc)但走到了这里，说明文件不存在
-        // 此时必须返回 404 而不是 index.html，否则浏览器报 SyntaxError: Unexpected token '<'
         let path_str = req.uri().path();
         if path_str.ends_with(".js")
             || path_str.ends_with(".css")
@@ -257,10 +229,8 @@ async fn main() -> anyhow::Result<()> {
         let path = std::path::Path::new(&index_dist_path).join("index.html");
         match tokio::fs::read_to_string(&path).await {
             Ok(content) => {
-                // 注入 WEB_ROOT 和 BASE 标签以确保相对路径正确
                 let mut replaced = content.replace("{{WEB_ROOT}}", &web_root);
 
-                // 确保有 <base> 标签处理子路径资源
                 if !replaced.contains("<base") {
                     let base_tag = format!("<base href=\"{}\">", web_root);
                     replaced = replaced.replace("<head>", &format!("<head>{}", base_tag));
@@ -280,11 +250,9 @@ async fn main() -> anyhow::Result<()> {
         }
     };
 
-    // Chain the static service with the index fallback
     let file_service = tower_http::services::ServeDir::new(&dist_path)
         .fallback(axum::routing::get(index_handler.clone()));
 
-    // 获取 WEB_ROOT (默认 /)
     let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
     let mut normalized_web_root = if !web_root.starts_with('/') {
         format!("/{}", web_root)
@@ -295,31 +263,25 @@ async fn main() -> anyhow::Result<()> {
         normalized_web_root = format!("{}/", normalized_web_root);
     }
 
-    // 路由逻辑 - 关键：API 路由必须在 fallback 之前
     let base_path = normalized_web_root.trim_end_matches('/').to_string();
 
     let router = Router::new()
-        .nest("/api", api_router) // 必须嵌套在 /api 下，以匹配前端 apiClient
+        .nest("/api", api_router)
         .route("/", axum::routing::get(index_handler.clone()))
         .route("/index.html", axum::routing::get(index_handler.clone()))
-        .fallback_service(file_service); // 静态文件最后
+        .fallback_service(file_service);
 
     let app = if base_path.is_empty() || base_path == "/" {
         router.with_state(())
     } else {
-        let subpath = base_path.clone(); // 例如 "/123"
+        let subpath = base_path.clone();
         let nest_path = subpath.trim_end_matches('/').to_string();
 
-        // 补全带斜杠的路径 "/123/"
-        // 我们只加这个，因为它和 nest("/123") 不冲突，而且正好填补了 404 的空缺
         let subpath_slash = format!("{}/", nest_path);
 
         Router::new()
-            // 显式处理 "/123/" -> 返回首页
             .route(&subpath_slash, axum::routing::get(index_handler.clone()))
-            // 主逻辑：nest("/123") 处理 "/123" 和 "/123/api/..."
             .nest(&nest_path, router)
-            // 全局兜底
             .fallback(
                 move |req: axum::http::Request<axum::body::Body>| async move {
                     tracing::debug!("Global fallback 404: {}", req.uri().path());
@@ -334,7 +296,7 @@ async fn main() -> anyhow::Result<()> {
         if web_root.is_empty() { "/" } else { &web_root }
     );
     tracing::info!("Using web dist path: {}", dist_path);
-    tracing::info!("安全中间件已启用: CSP, X-Frame-Options, X-XSS-Protection");
+    tracing::info!("Security middleware enabled: CSP, X-Frame-Options, X-XSS-Protection");
 
     let port = std::env::var("SERVER_PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);

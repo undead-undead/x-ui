@@ -28,7 +28,7 @@ export const useLogsStore = create<LogsState>((set) => ({
             }
         } catch (error) {
             console.error('Failed to fetch logs:', error);
-            set({ logs: ['获取日志失败，请检查后端连接。'] });
+            set({ logs: ['Failed to fetch logs, please check backend connection.'] });
         } finally {
             set({ isLoading: false });
         }

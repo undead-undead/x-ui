@@ -1,6 +1,3 @@
-// src/utils/jwt.rs
-// JWT 生成与验证
-
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -10,14 +7,13 @@ use crate::errors::ApiError;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
-    pub sub: String,           // 用户ID
-    pub username: String,      // 用户名
-    pub password_version: i64, // 密码版本号 (用于失效旧 Token)
-    pub exp: i64,              // 过期时间
-    pub iat: i64,              // 签发时间
+    pub sub: String,
+    pub username: String,
+    pub password_version: i64,
+    pub exp: i64,
+    pub iat: i64,
 }
 
-/// 生成 JWT Token
 pub fn generate_token(
     user_id: i64,
     username: &str,
@@ -36,7 +32,7 @@ pub fn generate_token(
     let claims = Claims {
         sub: user_id.to_string(),
         username: username.to_string(),
-        password_version, // 包含密码版本号
+        password_version,
         exp,
         iat: now.timestamp(),
     };
@@ -50,7 +46,6 @@ pub fn generate_token(
     Ok(token)
 }
 
-/// 验证 JWT Token
 pub fn verify_token(token: &str) -> Result<Claims, ApiError> {
     let secret = env::var("JWT_SECRET").unwrap_or_else(|_| "default-secret-key".to_string());
 

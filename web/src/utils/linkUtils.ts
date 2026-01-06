@@ -1,8 +1,5 @@
 import type { Inbound } from '../types/inbound';
 
-/**
- * 将 Inbound 节点转换为 Xray 分享链接
- */
 export function generateShareLink(inbound: Inbound, serverAddr: string = window.location.hostname): string {
     const { protocol, settings, streamSettings, remark } = inbound;
     const urlRemark = encodeURIComponent(remark);
@@ -37,16 +34,10 @@ export function generateShareLink(inbound: Inbound, serverAddr: string = window.
             } else if (streamSettings.network === 'grpc') {
                 params.set('serviceName', streamSettings.grpcSettings?.serviceName || '');
             } else if (streamSettings.network === 'xhttp') {
-                // 修复：支持 xhttp 的 path 和 host
-                // 注意：后端可能存储在 xhttpSettings 里，字段名可能略有不同，需根据实际类型定义确认
-                // 假设 xhttpSettings 结构类似 { path: string, host: string, mode: string, ... }
-                // 如果后端没有返回 headers.Host，可能需要直接看 host 字段，或者这里根据 Reality/XHTTP 标准
-                // 标准 reality+xhttp 链接通常需要 path 和 host
                 const xhttp = streamSettings.xhttpSettings;
                 if (xhttp) {
                     if (xhttp.path) params.set('path', xhttp.path);
                     if (xhttp.host) params.set('host', xhttp.host);
-                    // mode参数也很重要 (auto, packet, etc.)
                     if (xhttp.mode) params.set('mode', xhttp.mode);
                 }
             }
@@ -83,15 +74,10 @@ export function generateShareLink(inbound: Inbound, serverAddr: string = window.
         return `trojan://${password}@${serverAddr}:${port}?${params.toString()}#${urlRemark}`;
     }
 
-    // 更多协议支持可以在此扩展
     return '';
 }
 
-/**
- * 复制文本到剪贴板
- */
 export async function copyToClipboard(text: string): Promise<boolean> {
-    // 优先尝试现代 API (需要 HTTPS)
     try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(text);
@@ -101,12 +87,9 @@ export async function copyToClipboard(text: string): Promise<boolean> {
         console.warn('Navigator clipboard failed, trying fallback:', err);
     }
 
-    // 回退方案：使用 textarea + execCommand (支持 HTTP)
     try {
         const textarea = document.createElement('textarea');
         textarea.value = text;
-
-        // 确保元素不可见但可被选中
         textarea.style.position = 'fixed';
         textarea.style.left = '-9999px';
         textarea.style.top = '0';

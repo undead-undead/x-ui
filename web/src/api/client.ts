@@ -2,11 +2,11 @@ import { apiClient } from './apiClient';
 import type { ApiResponse } from '../types/api';
 
 /**
- * 客户端（Client）相关 API
+ * Client related API
  */
 export const clientApi = {
     /**
-     * 获取所有客户端
+     * Get all clients
      */
     getClients: async (): Promise<ApiResponse> => {
         const response = await apiClient.get('/clients');
@@ -14,8 +14,8 @@ export const clientApi = {
     },
 
     /**
-     * 获取单个客户端
-     * @param id - 客户端 ID
+     * Get a single client
+     * @param id - Client ID
      */
     getClient: async (id: string): Promise<ApiResponse> => {
         const response = await apiClient.get(`/clients/${id}`);
@@ -23,8 +23,8 @@ export const clientApi = {
     },
 
     /**
-     * 创建客户端
-     * @param data - 客户端数据
+     * Create a client
+     * @param data - Client data
      */
     createClient: async (data: any): Promise<ApiResponse> => {
         const response = await apiClient.post('/clients', data);
@@ -32,9 +32,9 @@ export const clientApi = {
     },
 
     /**
-     * 更新客户端
-     * @param id - 客户端 ID
-     * @param data - 更新的数据
+     * Update client
+     * @param id - Client ID
+     * @param data - Updated data
      */
     updateClient: async (id: string, data: any): Promise<ApiResponse> => {
         const response = await apiClient.put(`/clients/${id}`, data);
@@ -42,8 +42,8 @@ export const clientApi = {
     },
 
     /**
-     * 删除客户端
-     * @param id - 客户端 ID
+     * Delete client
+     * @param id - Client ID
      */
     deleteClient: async (id: string): Promise<ApiResponse> => {
         const response = await apiClient.delete(`/clients/${id}`);

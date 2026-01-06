@@ -1,6 +1,3 @@
-// src/routes/mod.rs
-// 路由配置
-
 use axum::{
     middleware,
     routing::{get, post},
@@ -11,19 +8,15 @@ use sqlx::SqlitePool;
 use crate::{handlers, middleware::auth::auth_middleware, services::system_service::SharedMonitor};
 
 pub fn create_router(pool: SqlitePool, monitor: SharedMonitor) -> Router {
-    // 认证路由组
     let auth_routes = Router::new()
-        // 公开接口 (无需 JWT)
         .route("/login", post(handlers::auth::login))
         .route("/update", post(handlers::auth::update_credentials))
-        // 需要认证的接口
         .nest(
             "/",
             Router::new()
                 .route("/logout", post(handlers::auth::logout))
                 .route("/change-password", post(handlers::auth::change_password))
                 .route("/verify", get(handlers::auth::verify))
-                // 安全改进: 中间件现在会验证 Token 是否在密码修改后失效
                 .route_layer(middleware::from_fn_with_state(
                     pool.clone(),
                     auth_middleware,
@@ -31,7 +24,6 @@ pub fn create_router(pool: SqlitePool, monitor: SharedMonitor) -> Router {
         )
         .with_state(pool.clone());
 
-    // 系统路由（需要认证）
     let system_routes = Router::new()
         .route("/sysStats", post(handlers::system::get_sys_stats))
         .route("/restartXray", post(handlers::system::restart_xray))
@@ -45,15 +37,13 @@ pub fn create_router(pool: SqlitePool, monitor: SharedMonitor) -> Router {
         .route("/export-db", get(handlers::system::export_db))
         .route("/import-db", post(handlers::system::import_db))
         .route("/updateConfig", post(handlers::system::update_config))
-        // 安全改进: 中间件现在会验证 Token 是否在密码修改后失效
         .route_layer(middleware::from_fn_with_state(
             pool.clone(),
             auth_middleware,
         ))
-        .layer(axum::Extension(pool.clone())) // 为 apply_config 提供 DB 连接池
+        .layer(axum::Extension(pool.clone()))
         .with_state(monitor.clone());
 
-    // 入站路由（需要认证）
     let inbound_routes = Router::new()
         .route("/list", get(handlers::inbound::list_inbounds))
         .route("/add", post(handlers::inbound::add_inbound))
@@ -66,15 +56,13 @@ pub fn create_router(pool: SqlitePool, monitor: SharedMonitor) -> Router {
             auth_middleware,
         ))
         .layer(axum::Extension(pool.clone()))
-        .with_state(monitor.clone()); // SharedMonitor needed for apply_config
+        .with_state(monitor.clone());
 
-    // Xray 工具路由（无需认证，用于前端生成密钥）
     let xray_routes = Router::new().route(
         "/generate-reality-keys",
         get(crate::handlers::xray::generate_reality_keys),
     );
 
-    // 组合所有路由
     Router::new()
         .nest("/auth", auth_routes)
         .nest("/server", system_routes)

@@ -1,6 +1,3 @@
-// src/handlers/system.rs
-// 系统管理处理函数
-
 use crate::middleware::auth::AuthUser;
 use axum::extract::{Json, State};
 
@@ -10,8 +7,6 @@ use crate::{
     utils::response::ApiResponse,
 };
 
-/// POST /api/server/sysStats
-/// 获取服务器系统状态
 pub async fn get_sys_stats(
     State(monitor): State<SharedMonitor>,
     _user: AuthUser,
@@ -20,8 +15,6 @@ pub async fn get_sys_stats(
     Ok(ApiResponse::success(stats))
 }
 
-/// POST /api/server/restartXray
-/// 重启Xray服务
 pub async fn restart_xray(
     State(monitor): State<SharedMonitor>,
     _user: AuthUser,
@@ -30,15 +23,11 @@ pub async fn restart_xray(
     Ok(ApiResponse::success_no_data("Xray service restarted"))
 }
 
-/// POST /api/server/restartPanel
-/// 重启面板服务
 pub async fn restart_panel(_user: AuthUser) -> ApiResult<ApiResponse<()>> {
     system_service::restart_panel().await?;
     Ok(ApiResponse::success_no_data("Panel restart command sent"))
 }
 
-/// POST /api/server/stopXray
-/// 停止Xray服务
 pub async fn stop_xray(
     State(monitor): State<SharedMonitor>,
     _user: AuthUser,
@@ -47,8 +36,6 @@ pub async fn stop_xray(
     Ok(ApiResponse::success_no_data("Xray service stopped"))
 }
 
-/// POST /api/server/startXray
-/// 启动Xray服务
 pub async fn start_xray(
     State(monitor): State<SharedMonitor>,
     _user: AuthUser,
@@ -57,8 +44,6 @@ pub async fn start_xray(
     Ok(ApiResponse::success_no_data("Xray service started"))
 }
 
-/// POST /api/server/updateXray
-/// 更新Xray版本
 pub async fn update_xray(
     State(monitor): State<SharedMonitor>,
     _user: AuthUser,
@@ -68,8 +53,6 @@ pub async fn update_xray(
     Ok(ApiResponse::success_no_data("Xray update started"))
 }
 
-/// POST /api/server/applyConfig
-/// 生成配置文件并重启Xray
 pub async fn apply_config(
     State(monitor): State<SharedMonitor>,
     axum::Extension(pool): axum::Extension<sqlx::SqlitePool>,
@@ -81,22 +64,16 @@ pub async fn apply_config(
     ))
 }
 
-/// GET /api/server/xrayReleases
-/// 获取Xray所有版本
 pub async fn get_xray_releases(_user: AuthUser) -> ApiResult<ApiResponse<Vec<String>>> {
     let releases = system_service::get_xray_releases().await?;
     Ok(ApiResponse::success(releases))
 }
 
-/// POST /api/server/getLogs
-/// 获取系统日志
 pub async fn get_logs(_user: AuthUser) -> ApiResult<ApiResponse<Vec<String>>> {
     let logs = system_service::get_logs().await?;
     Ok(ApiResponse::success(logs))
 }
 
-/// GET /api/server/export-db
-/// 导出数据库文件
 pub async fn export_db(_user: AuthUser) -> impl axum::response::IntoResponse {
     use axum::body::Body;
     use axum::http::{header, StatusCode};
@@ -127,8 +104,6 @@ pub async fn export_db(_user: AuthUser) -> impl axum::response::IntoResponse {
     }
 }
 
-/// POST /api/server/import-db
-/// 导入数据库文件
 pub async fn import_db(
     _user: AuthUser,
     mut multipart: axum::extract::Multipart,
@@ -147,9 +122,7 @@ pub async fn import_db(
                 ))
             })?;
 
-            // 写入数据库文件
             let db_path = "data/x-ui.db";
-            // 备份原数据库
             let backup_path = "data/x-ui.db.bak";
             if tokio::fs::metadata(db_path).await.is_ok() {
                 tokio::fs::copy(db_path, backup_path).await.map_err(|e| {
@@ -185,13 +158,10 @@ pub struct UpdateConfigReq {
     pub port: u16,
 }
 
-/// POST /api/server/updateConfig
-/// 更新面板配置 (端口和根路径) 并重写 .env
 pub async fn update_config(
     _user: AuthUser,
     Json(req): Json<UpdateConfigReq>,
 ) -> ApiResult<ApiResponse<()>> {
-    // 尝试使用绝对路径，以防 CWD 不正确
     let env_path_str = if std::path::Path::new("/usr/local/x-ui/.env").exists() {
         "/usr/local/x-ui/.env"
     } else {
@@ -203,7 +173,6 @@ pub async fn update_config(
         .await
         .unwrap_or_default();
 
-    // 1. 规范化 WEB_ROOT
     let mut clean_root = req.web_root.trim().to_string();
     if !clean_root.starts_with('/') {
         clean_root = format!("/{}", clean_root);
@@ -212,8 +181,6 @@ pub async fn update_config(
         clean_root = format!("{}/", clean_root);
     }
 
-    // 2. 更新 .env 内容 (正则替换或追加)
-    // 简单起见，我们逐行处理
     let mut new_lines = Vec::new();
     let mut has_port = false;
     let mut has_root = false;

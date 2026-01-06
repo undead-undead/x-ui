@@ -18,7 +18,6 @@ interface InboundTableVirtualProps {
     isEmbedded?: boolean;
 }
 
-// 单行高度（像素）
 const ROW_HEIGHT = 100;
 
 interface VirtualInboundRowProps {
@@ -57,28 +56,24 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
             }}
         >
             <div className="flex items-center px-8 py-6 hover:bg-gray-50 transition-colors h-full whitespace-nowrap">
-                {/* 备注 */}
                 <div className="flex-[2.5] min-w-0">
                     <span className="text-[15px] font-bold text-gray-900 tracking-tight truncate block">
                         {item.remark}
                     </span>
                 </div>
 
-                {/* 协议 */}
                 <div className="flex-1 min-w-0 px-4 flex justify-center">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 leading-none">
                         {item.protocol}
                     </span>
                 </div>
 
-                {/* 端口 */}
                 <div className="flex-1 min-w-0 px-4 text-center">
                     <span className="text-[14px] font-bold text-gray-900 tabular-nums">
                         {item.port}
                     </span>
                 </div>
 
-                {/* 流量 */}
                 <div className="flex-2 min-w-0 px-4">
                     <div className="flex flex-col gap-0.5 text-[12px] font-bold tabular-nums">
                         <div className="flex items-center gap-2">
@@ -93,12 +88,10 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
                     </div>
                 </div>
 
-                {/* 状态 */}
                 <div className="flex-1 min-w-0 px-4 flex justify-center">
                     <Switch checked={item.enable} onChange={() => onToggle(item.id)} />
                 </div>
 
-                {/* 操作 */}
                 <div className="flex-2 min-w-0 px-4">
                     <div className="flex items-center justify-end pr-2">
                         <Dropdown onOpenChange={setIsMenuOpen}>
@@ -146,15 +139,13 @@ export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ i
     const { toggleEnable, deleteInbound, resetTraffic } = useInboundStore();
     const { openModal } = useModalStore();
 
-    // 虚拟滚动容器引用
     const parentRef = useRef<HTMLDivElement>(null);
 
-    // 使用 TanStack Virtual
     const virtualizer = useVirtualizer({
         count: inbounds.length,
         getScrollElement: () => parentRef.current,
         estimateSize: () => ROW_HEIGHT,
-        overscan: 5, // 预渲染上下各 5 行
+        overscan: 5,
     });
 
     const handleToggle = useCallback((id: string) => {
@@ -207,14 +198,11 @@ export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ i
         <div className={containerStyles}>
             <div className="overflow-x-auto">
                 <div className="min-w-[1000px]">
-                    {/* 虚拟滚动列表容器 */}
                     <div
                         ref={parentRef}
                         className="overflow-y-auto overflow-x-hidden relative"
                         style={{ height: '600px' }}
                     >
-                        {/* 固定的表头，现在它在滚动容器内，会自动缩进以避开滚动条 */}
-                        {/* 固定的表头 */}
                         <div className="sticky top-0 z-30 bg-gray-50 border-b border-gray-200">
                             <div className="flex items-center py-5 px-8">
                                 <div className="flex-[2.5] min-w-0">
@@ -278,10 +266,9 @@ export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ i
                         </div>
                     </div>
 
-                    {/* 空状态 */}
                     {inbounds.length === 0 && (
                         <div className="p-20 text-center">
-                            <p className="text-gray-400 font-bold tracking-tight text-[15px]">暂无运行中的节点</p>
+                            <p className="text-gray-400 font-bold tracking-tight text-[15px]">{t('inbound.no_nodes')}</p>
                         </div>
                     )}
                 </div>

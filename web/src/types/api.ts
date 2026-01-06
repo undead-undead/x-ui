@@ -1,11 +1,9 @@
-// API 通用响应类型
 export interface ApiResponse<T = any> {
     success: boolean;
     msg: string;
     obj: T;
 }
 
-// 系统状态相关类型
 export interface SystemMemory {
     current: number;
     total: number;
@@ -36,8 +34,8 @@ export interface SystemStatusData {
     mem: SystemMemory;
     swap: SystemMemory;
     disk: SystemDisk;
-    uptime: number; // 秒
-    load: number[]; // [1, 5, 15]
+    uptime: number;
+    load: number[];
     xray: XrayStatus;
     tcpCount: number;
     udpCount: number;
@@ -47,7 +45,6 @@ export interface SystemStatusData {
 
 export type ApiSysStatus = ApiResponse<SystemStatusData>;
 
-// 认证相关类型
 export interface UpdateCredentialsRequest {
     oldUsername: string;
     oldPassword: string;
@@ -55,10 +52,8 @@ export interface UpdateCredentialsRequest {
     newPassword: string;
 }
 
-// 日志响应类型
 export type ApiLogsResponse = ApiResponse<string[]>;
 
-// Xray 版本更新请求
 export interface UpdateXrayVersionRequest {
     version: string;
 }

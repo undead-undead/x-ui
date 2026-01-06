@@ -1,6 +1,3 @@
-// src/utils/password.rs
-// 密码哈希与验证
-
 use argon2::{
     password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
@@ -8,7 +5,6 @@ use argon2::{
 
 use crate::errors::ApiError;
 
-/// 对密码进行哈希
 pub fn hash_password(password: &str) -> Result<String, ApiError> {
     let salt = SaltString::generate(&mut argon2::password_hash::rand_core::OsRng);
     let argon2 = Argon2::default();
@@ -21,7 +17,6 @@ pub fn hash_password(password: &str) -> Result<String, ApiError> {
     Ok(password_hash)
 }
 
-/// 验证密码
 pub fn verify_password(password: &str, hash: &str) -> Result<bool, ApiError> {
     let parsed_hash = PasswordHash::new(hash).map_err(|_| ApiError::PasswordHashError)?;
 

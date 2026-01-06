@@ -4,62 +4,48 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Web 框架
 axum = { version = "0.7", features = ["macros", "multipart"] }
 tokio = { version = "1.42", features = ["full"] }
 tower = "0.5"
 tower-http = { version = "0.6", features = ["cors", "trace", "compression-gzip", "fs"] }
 
-# 序列化
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
-# 数据库
 sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "chrono"] }
 
-# 认证
 jsonwebtoken = "9.3"
 argon2 = "0.5"
 
-# 配置管理
 dotenvy = "0.15"
 
-# 日志
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-# 错误处理
 anyhow = "1.0"
 thiserror = "2.0"
 
-# 系统监控
 sysinfo = { version = "0.33", default-features = false, features = ["system", "disk", "network"] }
 
-# 时间处理
 chrono = { version = "0.4", features = ["serde"] }
 
-# UUID 生成
 uuid = { version = "1.11", features = ["v4", "serde"] }
 
-# Xray 进程管理
 async-process = "2.3"
 
-# 随机数生成（用于密码salt）
 rand_core = { version = "0.6", features = ["getrandom"] }
 
-# 正则表达式（用于输入验证）
 regex = "1.11"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
 zip = { version = "2.1", default-features = false, features = ["deflate"] }
 futures-util = "0.3.31"
 
-# 内存分配优化
 mimalloc = "0.1"
 [profile.release]
-opt-level = "s"      # 平衡体积和速度，往往比 'z' 更有利于运行时内存
-lto = true           # 开启全量 LTO (编译变慢但优化更彻底)
-codegen-units = 1    # 提高优化质量
-panic = "abort"      # 移除 panic 展开信息，减小约几百KB体积和内存
-strip = true         # 自动移除调试符号
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
 [dev-dependencies]
 axum-test = "16.3"

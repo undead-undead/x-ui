@@ -8,19 +8,16 @@ export const Dialog = () => {
 
     return (
         <>
-            {/* 背景遮罩 */}
             <div
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] animate-in fade-in duration-150"
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-1000 animate-in fade-in duration-150"
                 onClick={type === 'alert' ? onConfirm || close : undefined}
             />
 
-            {/* 对话框 */}
-            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 pointer-events-none">
+            <div className="fixed inset-0 z-1000 flex items-center justify-center p-4 pointer-events-none">
                 <div
                     className="bg-white rounded-3xl shadow-2xl max-w-md w-full pointer-events-auto animate-in zoom-in-95 fade-in duration-150"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* 图标和标题 */}
                     <div className="p-8 pb-6 text-center">
                         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                             {type === 'alert' ? (
@@ -34,14 +31,12 @@ export const Dialog = () => {
                         </h3>
                     </div>
 
-                    {/* 消息内容 */}
                     <div className="px-8 pb-8">
                         <p className="text-[15px] text-gray-600 text-center leading-relaxed font-medium">
                             {message}
                         </p>
                     </div>
 
-                    {/* 按钮 */}
                     <div className="p-6 pt-0 flex gap-3">
                         {type === 'confirm' && onCancel && (
                             <button

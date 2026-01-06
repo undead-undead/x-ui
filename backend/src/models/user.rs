@@ -1,6 +1,3 @@
-// src/models/user.rs
-// 用户数据模型
-
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -12,7 +9,7 @@ pub struct User {
     pub username: String,
     #[serde(skip_serializing)]
     pub password_hash: String,
-    pub password_version: i64, // 密码版本号,每次修改密码时递增
+    pub password_version: i64,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }

@@ -6,7 +6,6 @@ export const LogsModal = () => {
     const { isOpen, close, logs, isLoading, fetchLogs } = useLogsStore();
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // 每次日志更新时自动滚动到底部
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -17,26 +16,23 @@ export const LogsModal = () => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-            {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-white/40 backdrop-blur-md animate-in fade-in duration-300"
                 onClick={close}
             />
 
-            {/* Modal Content */}
             <div className="relative w-full max-w-4xl h-[80vh] bg-white border border-gray-100 rounded-4xl shadow-[0_24px_48px_-12px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300">
 
-                {/* Header */}
                 <div className="flex items-center justify-between p-8 border-b border-gray-50 bg-white/50 backdrop-blur-sm sticky top-0 z-10">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white shadow-lg">
                             <Terminal size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900 tracking-tight">运行日志</h2>
+                            <h2 className="text-xl font-bold text-gray-900 tracking-tight">System Logs</h2>
                             <p className="text-[12px] font-medium text-gray-400 mt-1 flex items-center gap-2">
                                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                实时监控中
+                                Real-time monitoring
                             </p>
                         </div>
                     </div>
@@ -57,7 +53,6 @@ export const LogsModal = () => {
                     </div>
                 </div>
 
-                {/* Log Content */}
                 <div
                     ref={scrollRef}
                     className="flex-1 overflow-y-auto p-8 bg-gray-50/50 space-y-2 font-mono text-[13px] selection:bg-black selection:text-white"
@@ -65,7 +60,7 @@ export const LogsModal = () => {
                     {logs.length === 0 && !isLoading ? (
                         <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-4">
                             <Terminal size={48} strokeWidth={1} className="opacity-20" />
-                            <p className="font-medium">暂无运行日志</p>
+                            <p className="font-medium">No logs found</p>
                         </div>
                     ) : (
                         logs.map((log, index) => (
@@ -78,12 +73,11 @@ export const LogsModal = () => {
                     {isLoading && (
                         <div className="flex items-center gap-3 text-gray-400 animate-pulse py-2">
                             <RefreshCw size={14} className="animate-spin" />
-                            <span>正在刷新数据...</span>
+                            <span>Refreshing data...</span>
                         </div>
                     )}
                 </div>
 
-                {/* Footer */}
                 <div className="p-6 border-t border-gray-50 bg-white flex items-center justify-between text-[12px] text-gray-400 font-medium">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center gap-1.5">
@@ -92,7 +86,7 @@ export const LogsModal = () => {
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 bg-gray-300 rounded-full" />
-                            {logs.length} 行
+                            {logs.length} Lines
                         </span>
                     </div>
                     <button
@@ -103,7 +97,7 @@ export const LogsModal = () => {
                         }}
                         className="flex items-center gap-2 text-gray-900 hover:text-black transition-colors"
                     >
-                        <span>滚动至底部</span>
+                        <span>Scroll to bottom</span>
                         <ChevronDown size={14} />
                     </button>
                 </div>

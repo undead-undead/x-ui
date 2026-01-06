@@ -8,7 +8,6 @@ pub struct RealityKeysResponse {
     pub public_key: String,
 }
 
-/// 生成 Reality 密钥对
 pub async fn generate_reality_keys() -> Result<Json<RealityKeysResponse>, StatusCode> {
     let xray_bin =
         std::env::var("XRAY_BIN_PATH").unwrap_or_else(|_| "/usr/local/x-ui/bin/xray".to_string());
@@ -33,10 +32,6 @@ pub async fn generate_reality_keys() -> Result<Json<RealityKeysResponse>, Status
 
     tracing::info!("xray x25519 output: {}", stdout);
 
-    // 解析输出
-    // 格式：
-    // PrivateKey: xxxxx
-    // Password: yyyyy  (这是公钥)
     let mut private_key = String::new();
     let mut public_key = String::new();
 

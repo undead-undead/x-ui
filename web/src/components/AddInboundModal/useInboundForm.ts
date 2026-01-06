@@ -4,7 +4,6 @@ import { generateRandomPort } from '../../config/constants';
 import type { Inbound } from '../../types/inbound';
 
 export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => {
-    // === 基础配置 ===
     const [remark, setRemark] = useState('');
     const [isEnable, setIsEnable] = useState(true);
     const [protocol, setProtocol] = useState('vless');
@@ -14,7 +13,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
     const [totalTraffic, setTotalTraffic] = useState('0');
     const [expiryTime, setExpiryTime] = useState('');
 
-    // === 协议配置 ===
     const [uuid, setUuid] = useState<string>(generateUUID());
     const [flow, setFlow] = useState('');
     const [level, setLevel] = useState('0');
@@ -26,7 +24,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
     const [ssNetwork, setSsNetwork] = useState('tcp,udp');
     const [decryption, setDecryption] = useState('none');
 
-    // === 传输层配置 ===
     const [network, setNetwork] = useState('tcp');
     const [wsPath, setWsPath] = useState('/');
     const [wsHost, setWsHost] = useState('');
@@ -38,7 +35,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
     const [xhttpPath, setXhttpPath] = useState('/');
     const [xhttpHost, setXhttpHost] = useState('');
 
-    // === 安全层配置 ===
     const [security, setSecurity] = useState('none');
     const [realityShow, setRealityShow] = useState(false);
     const [realityDest, setRealityDest] = useState('www.microsoft.com:443');
@@ -52,7 +48,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
     const [realityMaxClientVer, setRealityMaxClientVer] = useState('');
     const [realityMaxTimeDiff, setRealityMaxTimeDiff] = useState('');
 
-    // === Socket 选项 ===
     const [acceptProxyProtocol, setAcceptProxyProtocol] = useState(false);
     const [tcpFastOpen, setTcpFastOpen] = useState(true);
     const [tcpNoDelay, setTcpNoDelay] = useState(true);
@@ -104,7 +99,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
 
     useEffect(() => {
         if (isOpen && editingNode) {
-            // 加载编辑数据
             setRemark(editingNode.remark || '');
             setIsEnable(editingNode.enable ?? true);
             setProtocol(editingNode.protocol || 'vless');
@@ -128,6 +122,7 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
                 setDecryption(settings.decryption || 'none');
 
                 if (editingNode.protocol === 'shadowsocks') {
+                    setSsMethod(settings.method || 'chacha20-ietf-poly1305');
                     setSsMethod(settings.method || 'chacha20-ietf-poly1305');
                     setSsPassword(settings.password || '');
                     setSsNetwork(settings.network || 'tcp,udp');
@@ -188,7 +183,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
     }, [isOpen, editingNode]);
 
     return {
-        // 基础配置
         remark, setRemark,
         isEnable, setIsEnable,
         protocol, setProtocol,
@@ -198,7 +192,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
         totalTraffic, setTotalTraffic,
         expiryTime, setExpiryTime,
 
-        // 协议配置
         uuid, setUuid,
         flow, setFlow,
         level, setLevel,
@@ -210,7 +203,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
         ssNetwork, setSsNetwork,
         decryption, setDecryption,
 
-        // 传输层配置
         network, setNetwork,
         wsPath, setWsPath,
         wsHost, setWsHost,
@@ -222,7 +214,6 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
         xhttpPath, setXhttpPath,
         xhttpHost, setXhttpHost,
 
-        // 安全层配置
         security, setSecurity,
         realityShow, setRealityShow,
         realityDest, setRealityDest,
@@ -236,12 +227,10 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
         realityMaxClientVer, setRealityMaxClientVer,
         realityMaxTimeDiff, setRealityMaxTimeDiff,
 
-        // Socket 选项
         acceptProxyProtocol, setAcceptProxyProtocol,
         tcpFastOpen, setTcpFastOpen,
         tcpNoDelay, setTcpNoDelay,
 
-        // 工具方法
         resetForm,
     };
 };
