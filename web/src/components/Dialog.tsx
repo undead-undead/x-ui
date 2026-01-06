@@ -1,7 +1,9 @@
 import { useDialogStore } from '../store/useDialogStore';
 import { AlertCircle, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const Dialog = () => {
+    const { t } = useTranslation();
     const { isOpen, type, title, message, confirmText, cancelText, onConfirm, onCancel, close } = useDialogStore();
 
     if (!isOpen) return null;
@@ -43,7 +45,7 @@ export const Dialog = () => {
                                 onClick={onCancel}
                                 className="flex-1 h-12 bg-gray-100 text-gray-700 rounded-xl font-bold text-[14px] hover:bg-gray-200 active:scale-95 transition-all"
                             >
-                                {cancelText}
+                                {cancelText === 'Cancel' ? t('inbound.modal.cancel') : cancelText}
                             </button>
                         )}
                         <button
@@ -51,7 +53,7 @@ export const Dialog = () => {
                             className={`h-12 bg-black text-white rounded-xl font-bold text-[14px] hover:bg-gray-800 active:scale-95 transition-all shadow-lg ${type === 'confirm' ? 'flex-1' : 'w-full'
                                 }`}
                         >
-                            {confirmText}
+                            {confirmText === 'OK' ? t('inbound.modal.confirm') : confirmText}
                         </button>
                     </div>
                 </div>
