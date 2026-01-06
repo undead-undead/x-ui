@@ -125,17 +125,19 @@ export const InboundPage = () => {
                             <div className="flex flex-col gap-2">
                                 <button
                                     onClick={() => openBackupModal()}
-                                    className="flex items-center justify-center px-4 py-1.5 bg-white text-black rounded-lg text-[12px] font-bold border border-black hover:-translate-y-[1px] hover:shadow-[0_2px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none h-8 w-full"
+                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none w-full"
+                                    style={{ padding: '5px 24px 4px 24px' }}
                                 >
-                                    <Database size={14} strokeWidth={2.5} className="mr-1.5" />
+                                    <Database size={16} strokeWidth={2.5} className="mr-2" />
                                     <span>{t('settings.backup.manage_btn')}</span>
                                 </button>
 
                                 <button
                                     onClick={() => openModal()}
-                                    className="flex items-center justify-center px-4 py-1.5 bg-white text-black rounded-lg text-[12px] font-bold border border-black hover:-translate-y-[1px] hover:shadow-[0_2px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none h-8 w-full"
+                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none w-full"
+                                    style={{ padding: '5px 24px 4px 24px' }}
                                 >
-                                    <Plus size={14} strokeWidth={3} className="mr-1.5" />
+                                    <Plus size={16} strokeWidth={3} className="mr-2" />
                                     <span>{t('inbound.modal.title_add')}</span>
                                 </button>
                             </div>
