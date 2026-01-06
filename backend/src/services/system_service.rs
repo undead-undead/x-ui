@@ -38,12 +38,18 @@ impl SystemMonitor {
 
         let cpu_load = self.sys.global_cpu_usage() as f64;
 
-        let mem_total = self.sys.total_memory();
-        let mem_available = self.sys.available_memory();
-        let mem_current = mem_total.saturating_sub(mem_available);
-
-        let swap_current = self.sys.used_swap();
-        let swap_total = self.sys.total_swap();
+        // Try getting memory and swap from free command first to match "free -h" output
+        let (mem_total, mem_current, swap_total, swap_current) =
+            if let Some((mt, mu, st, su)) = get_linux_memory_stats() {
+                (mt, mu, st, su)
+            } else {
+                let mem_total = self.sys.total_memory();
+                let mem_available = self.sys.available_memory();
+                let mem_current = mem_total.saturating_sub(mem_available);
+                let swap_current = self.sys.used_swap();
+                let swap_total = self.sys.total_swap();
+                (mem_total, mem_current, swap_total, swap_current)
+            };
 
         let mut disk_current = 0;
         let mut disk_total = 0;
@@ -557,4 +563,49 @@ fn get_xray_version() -> Option<String> {
     }
 
     None
+}
+
+fn get_linux_memory_stats() -> Option<(u64, u64, u64, u64)> {
+    let output = std::process::Command::new("free").arg("-b").output().ok()?;
+
+    if !output.status.success() {
+        return None;
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let mut mem_total = 0;
+    let mut mem_used = 0;
+    let mut swap_total = 0;
+    let mut swap_used = 0;
+    let mut mem_found = false;
+
+    for line in stdout.lines() {
+        if line.starts_with("Mem:") {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            // parts[0] is "Mem:"
+            // parts[1] is total
+            // parts[2] is used
+            if parts.len() >= 3 {
+                mem_total = parts[1].parse().ok()?;
+                mem_used = parts[2].parse().ok()?;
+                mem_found = true;
+            }
+        } else if line.starts_with("Swap:") {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            // parts[0] is "Swap:"
+            // parts[1] is total
+            // parts[2] is used
+            if parts.len() >= 3 {
+                swap_total = parts[1].parse().ok()?;
+                swap_used = parts[2].parse().ok()?;
+            }
+        }
+    }
+
+    if mem_found {
+        // If swap is not found (e.g. no swap enabled), it remains 0 which is correct
+        Some((mem_total, mem_used, swap_total, swap_used))
+    } else {
+        None
+    }
 }
