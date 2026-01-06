@@ -136,7 +136,9 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
 
 export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ inbounds, isEmbedded }) => {
     const { t } = useTranslation();
-    const { toggleEnable, deleteInbound, resetTraffic } = useInboundStore();
+    const toggleEnable = useInboundStore(s => s.toggleEnable);
+    const deleteInbound = useInboundStore(s => s.deleteInbound);
+    const resetTraffic = useInboundStore(s => s.resetTraffic);
     const { openModal } = useModalStore();
 
     const parentRef = useRef<HTMLDivElement>(null);

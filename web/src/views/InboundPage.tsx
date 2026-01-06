@@ -60,7 +60,7 @@ export const InboundPage = () => {
         fetchInbounds();
 
         const timer = setInterval(() => {
-            fetchInbounds();
+            fetchInbounds(true);
         }, 5000);
 
         return () => clearInterval(timer);

@@ -111,7 +111,9 @@ InboundRow.displayName = 'InboundRow';
 
 export const InboundTable: React.FC<InboundTableProps> = memo(({ inbounds, isEmbedded }) => {
     const { t } = useTranslation();
-    const { toggleEnable, deleteInbound, resetTraffic } = useInboundStore();
+    const toggleEnable = useInboundStore(s => s.toggleEnable);
+    const deleteInbound = useInboundStore(s => s.deleteInbound);
+    const resetTraffic = useInboundStore(s => s.resetTraffic);
     const { openModal } = useModalStore();
 
     const handleToggle = useCallback((id: string) => {

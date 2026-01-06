@@ -6,7 +6,7 @@ import { useDialogStore } from './useDialogStore';
 interface InboundStore {
     inbounds: Inbound[];
     loading: boolean;
-    fetchInbounds: () => Promise<void>;
+    fetchInbounds: (background?: boolean) => Promise<void>;
     addInbound: (node: any) => Promise<void>;
     updateInbound: (node: any) => Promise<void>;
     deleteInbound: (id: string) => Promise<void>;
@@ -19,8 +19,8 @@ export const useInboundStore = create<InboundStore>((set, get) => ({
     inbounds: [],
     loading: false,
 
-    fetchInbounds: async () => {
-        set({ loading: true });
+    fetchInbounds: async (background = false) => {
+        if (!background) set({ loading: true });
         try {
             const res = await inboundApi.getInbounds();
             if (res.success) {
@@ -34,7 +34,7 @@ export const useInboundStore = create<InboundStore>((set, get) => ({
                 set({ inbounds: processed });
             }
         } finally {
-            set({ loading: false });
+            if (!background) set({ loading: false });
         }
     },
 
