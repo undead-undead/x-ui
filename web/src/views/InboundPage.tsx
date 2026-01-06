@@ -142,13 +142,13 @@ export const InboundPage = () => {
 
                         <div className="flex-1 flex justify-center">
                             <div className="flex items-center gap-3 w-auto min-w-fit h-11 px-5 bg-white border border-black rounded-xl shadow-[0_1px_0_0_#94a3b8]">
-                                <div className="flex flex-col whitespace-nowrap">
-                                    <span className="text-[10px] text-gray-500 font-medium leading-tight">{t('inbound.up_total')}</span>
+                                <div className="flex flex-row items-center gap-2 whitespace-nowrap">
+                                    <span className="text-[10px] text-gray-500 font-medium">{t('inbound.up_total')}</span>
                                     <span className="text-[13px] font-bold text-gray-700 tabular-nums">{totalUpload}</span>
                                 </div>
                                 <div className="w-px h-6 bg-gray-300"></div>
-                                <div className="flex flex-col whitespace-nowrap">
-                                    <span className="text-[10px] text-gray-500 font-medium leading-tight">{t('inbound.down_total')}</span>
+                                <div className="flex flex-row items-center gap-2 whitespace-nowrap">
+                                    <span className="text-[10px] text-gray-500 font-medium">{t('inbound.down_total')}</span>
                                     <span className="text-[13px] font-bold text-gray-700 tabular-nums">{totalDownload}</span>
                                 </div>
                                 <button
