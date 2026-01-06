@@ -122,25 +122,14 @@ export const InboundPage = () => {
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-lg animate-in fade-in slide-in-from-bottom-6 duration-1000">
                     <div className="flex items-center justify-between gap-4 px-8 py-6 border-b border-gray-200">
                         <div className="flex items-center gap-4">
-                            <div className="flex flex-col gap-2">
-                                <button
-                                    onClick={() => openBackupModal()}
-                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none w-full"
-                                    style={{ padding: '5px 24px 4px 24px' }}
-                                >
-                                    <Database size={16} strokeWidth={2.5} className="mr-2" />
-                                    <span>{t('settings.backup.manage_btn')}</span>
-                                </button>
-
-                                <button
-                                    onClick={() => openModal()}
-                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none w-full"
-                                    style={{ padding: '5px 24px 4px 24px' }}
-                                >
-                                    <Plus size={16} strokeWidth={3} className="mr-2" />
-                                    <span>{t('inbound.modal.title_add')}</span>
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => openModal()}
+                                className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
+                                style={{ padding: '5px 24px 4px 24px' }}
+                            >
+                                <Plus size={16} strokeWidth={3} className="mr-2" />
+                                <span>{t('inbound.modal.title_add')}</span>
+                            </button>
 
                             <input
                                 type="text"
@@ -227,7 +216,14 @@ export const InboundPage = () => {
                             </div>
 
                             <div className="flex items-center gap-6 text-[13px] font-bold text-gray-500">
-                                <span className="tabular-nums">{t('inbound.total_count')}: {inbounds.length}</span>
+                                <button
+                                    onClick={() => openBackupModal()}
+                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
+                                    style={{ padding: '5px 24px 4px 24px' }}
+                                >
+                                    <Database size={16} strokeWidth={2.5} className="mr-2" />
+                                    <span>{t('settings.backup.manage_btn')}</span>
+                                </button>
                             </div>
                         </div>
                     </div>
