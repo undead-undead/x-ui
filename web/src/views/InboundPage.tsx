@@ -122,23 +122,23 @@ export const InboundPage = () => {
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-lg animate-in fade-in slide-in-from-bottom-6 duration-1000">
                     <div className="flex items-center justify-between gap-4 px-8 py-6 border-b border-gray-200">
                         <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => openBackupModal()}
-                                className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
-                                style={{ padding: '5px 24px 4px 24px' }}
-                            >
-                                <Database size={16} strokeWidth={2.5} className="mr-2" />
-                                <span>{t('settings.backup.manage_btn')}</span>
-                            </button>
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    onClick={() => openBackupModal()}
+                                    className="flex items-center justify-center px-4 py-1.5 bg-white text-black rounded-lg text-[12px] font-bold border border-black hover:-translate-y-[1px] hover:shadow-[0_2px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none h-8 w-full"
+                                >
+                                    <Database size={14} strokeWidth={2.5} className="mr-1.5" />
+                                    <span>{t('settings.backup.manage_btn')}</span>
+                                </button>
 
-                            <button
-                                onClick={() => openModal()}
-                                className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
-                                style={{ padding: '5px 24px 4px 24px' }}
-                            >
-                                <Plus size={16} strokeWidth={3} className="mr-2" />
-                                <span>{t('inbound.modal.title_add')}</span>
-                            </button>
+                                <button
+                                    onClick={() => openModal()}
+                                    className="flex items-center justify-center px-4 py-1.5 bg-white text-black rounded-lg text-[12px] font-bold border border-black hover:-translate-y-[1px] hover:shadow-[0_2px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none h-8 w-full"
+                                >
+                                    <Plus size={14} strokeWidth={3} className="mr-1.5" />
+                                    <span>{t('inbound.modal.title_add')}</span>
+                                </button>
+                            </div>
 
                             <input
                                 type="text"
@@ -150,7 +150,7 @@ export const InboundPage = () => {
                         </div>
 
                         <div className="flex-1 flex justify-center">
-                            <div className="flex items-center gap-3 w-auto min-w-fit py-2 px-5 bg-white border border-black rounded-xl shadow-[0_1px_0_0_#94a3b8]">
+                            <div className="flex items-center gap-3 w-auto min-w-fit h-11 px-5 bg-white border border-black rounded-xl shadow-[0_1px_0_0_#94a3b8]">
                                 <div className="flex flex-col flex-1">
                                     <span className="text-[10px] text-gray-500 font-medium leading-tight">{t('inbound.up_total')}</span>
                                     <span className="text-[13px] font-bold text-gray-700 tabular-nums">{totalUpload}</span>
