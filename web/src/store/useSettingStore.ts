@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { AllSettings, SettingStore, PanelConfig } from '../types/setting';
 import { useDialogStore } from './useDialogStore';
 import { SETTINGS_REDIRECT_DELAY } from '../config/constants';
+import i18n from '../i18n/config';
 
 const INITIAL_DATA: AllSettings = {
     panel: {
@@ -193,7 +194,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
             await sysApi.exportDb();
         } catch (error) {
             console.error("Export failed:", error);
-            useDialogStore.getState().showAlert("Export file failed", "Export Error");
+            useDialogStore.getState().showAlert(i18n.t('settings.backup.export_error'), "Export Error");
         }
     },
 
@@ -202,13 +203,13 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
             const { sysApi } = await import('../api/system');
             const response = await sysApi.importDb(file);
             useDialogStore.getState().showAlert(
-                response.msg || "Database imported successfully! Please manually restart panel for changes to take effect.",
-                "Import Success"
+                response.msg || i18n.t('settings.backup.import_success_msg'),
+                i18n.t('settings.backup.import_success_title')
             );
         } catch (error: any) {
             console.error("Import failed:", error);
-            const msg = error.response?.data?.msg || "Import file failed";
-            useDialogStore.getState().showAlert(msg, "Import Error");
+            const msg = error.response?.data?.msg || i18n.t('settings.backup.import_error_msg');
+            useDialogStore.getState().showAlert(msg, i18n.t('settings.backup.import_error_title'));
         }
     }
 }));

@@ -66,7 +66,7 @@ export const BackupModal = () => {
                         className="group flex flex-col items-center justify-center gap-4 p-8 bg-white border border-gray-100 rounded-3xl hover:border-black active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
                     >
                         <div className="w-12 h-12 bg-gray-50 group-hover:bg-black group-hover:text-white rounded-2xl flex items-center justify-center text-gray-900 transition-all duration-300">
-                            <Download size={24} />
+                            <Upload size={24} />
                         </div>
                         <div className="text-center">
                             <p className="text-[15px] font-bold text-gray-900">{t('settings.backup.export_btn')}</p>
@@ -78,7 +78,7 @@ export const BackupModal = () => {
                         className="group flex flex-col items-center justify-center gap-4 p-8 bg-white border border-gray-100 rounded-3xl hover:border-black active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
                     >
                         <div className="w-12 h-12 bg-gray-50 group-hover:bg-black group-hover:text-white rounded-2xl flex items-center justify-center text-gray-900 transition-all duration-300">
-                            <Upload size={24} />
+                            <Download size={24} />
                         </div>
                         <div className="text-center">
                             <p className="text-[15px] font-bold text-gray-900">{t('settings.backup.import_btn')}</p>

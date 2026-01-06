@@ -208,7 +208,12 @@
             "export_desc": "• Export: Save current nodes and configuration to local file.",
             "import_desc": "• Import: Restore from backup, manual restart required after completion.",
             "export_btn": "Export Now",
-            "import_btn": "Import File"
+            "import_btn": "Import File",
+            "export_error": "Export failed",
+            "import_success_title": "Import Success",
+            "import_success_msg": "Database imported successfully! Please manually restart panel for changes to take effect.",
+            "import_error_title": "Import Failed",
+            "import_error_msg": "Import file failed"
         },
         "advanced": {
             "title": "System Environment",
