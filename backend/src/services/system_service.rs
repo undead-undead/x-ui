@@ -288,7 +288,9 @@ pub async fn stop_xray(monitor: SharedMonitor) -> ApiResult<()> {
     tracing::info!("Received request to stop Xray service...");
 
     {
-        let mut m = monitor.lock().unwrap();
+        let mut m = monitor.lock().map_err(|e| {
+            crate::errors::ApiError::SystemError(format!("Monitor lock poisoned: {}", e))
+        })?;
         m.set_mock_running(false);
     }
 
@@ -309,7 +311,9 @@ pub async fn start_xray(monitor: SharedMonitor) -> ApiResult<()> {
     tracing::info!("Received request to start Xray service...");
 
     {
-        let mut m = monitor.lock().unwrap();
+        let mut m = monitor.lock().map_err(|e| {
+            crate::errors::ApiError::SystemError(format!("Monitor lock poisoned: {}", e))
+        })?;
         m.set_mock_running(true);
     }
 

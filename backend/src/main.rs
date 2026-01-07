@@ -98,12 +98,26 @@ async fn main() -> anyhow::Result<()> {
 
     dotenvy::dotenv().ok();
 
+    // Setup log rotation: daily rotation, keep 7 days
+    let log_dir = std::path::Path::new("logs");
+    if !log_dir.exists() {
+        std::fs::create_dir_all(log_dir)?;
+    }
+
+    let file_appender = tracing_appender::rolling::daily("logs", "x-ui.log");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "info,sqlx=warn".into()),
         )
         .with(tracing_subscriber::fmt::layer())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_writer(non_blocking)
+                .with_ansi(false),
+        )
         .init();
 
     let pool = db::init_pool().await?;

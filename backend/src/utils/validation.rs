@@ -1,5 +1,9 @@
 use crate::errors::ApiError;
 use regex::Regex;
+use std::sync::LazyLock;
+
+static USERNAME_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[a-zA-Z0-9_-]+$").expect("Invalid username regex pattern"));
 
 pub fn validate_username(username: &str) -> Result<(), ApiError> {
     if username.len() < 3 || username.len() > 32 {
@@ -8,8 +12,7 @@ pub fn validate_username(username: &str) -> Result<(), ApiError> {
         ));
     }
 
-    let re = Regex::new(r"^[a-zA-Z0-9_-]+$").unwrap();
-    if !re.is_match(username) {
+    if !USERNAME_REGEX.is_match(username) {
         return Err(ApiError::BadRequest(
             "Username can only contain letters, numbers, underscores, and hyphens".to_string(),
         ));

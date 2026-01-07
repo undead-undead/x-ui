@@ -11,7 +11,10 @@ pub async fn get_sys_stats(
     State(monitor): State<SharedMonitor>,
     _user: AuthUser,
 ) -> ApiResult<ApiResponse<system_service::SysStats>> {
-    let stats = monitor.lock().unwrap().get_system_stats()?;
+    let stats = monitor
+        .lock()
+        .map_err(|e| crate::errors::ApiError::SystemError(format!("Monitor lock poisoned: {}", e)))?
+        .get_system_stats()?;
     Ok(ApiResponse::success(stats))
 }
 
